@@ -1,0 +1,264 @@
+---
+title: "Using GPG in R"
+author: "Jeroen Ooms"
+output:
+  html_document:
+    fig_caption: false
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Using GPG in R}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE, message = FALSE}
+unlink("~/myapp", recursive = TRUE)
+knitr::opts_chunk$set(comment = "")
+library(gpg)
+options(width = 120)
+```
+
+
+**DISCLAIMER**: Author is not an expert in cryptography (he is not an expert in anything really). Use this stuff at your own risk. If you find bugs or inaccuracies, please create an issue or PR on the [github repository](https://github.com/jeroenooms/gpg).  
+
+## GPG basics
+
+The *GNU Privacy Guard*, also known as *GnuPG* or simply *GPG*, is a popular open source implementation of the OpenPGP protocol ([RFC4880](https://tools.ietf.org/html/rfc4880)). The system is widely adopted for securing integrity and confidentiality of internet communications through the use of various cryptographic methods. Important applications include encryption and authentication of messages (such as email or software downloads) via public key encryption and cryptographic signatures.
+
+Like most modern crypto systems, GPG makes use of public key methods. The private key is known only by its owner and is used to create signatures or decrypt a message. The corresponding public key is made freely available and so that it can be used by anyone to verify signatures, or encrypt messages which can only be encrypted by the keypair owner. 
+
+### Compare to HTTPS
+
+The major difference between GPG and PKI systems (such as HTTPS) is how we exchange and authenticate public keys. HTTPS is based on a system with Certificate Authorities (CA). Anyone can create a keypair for any domain/personal name, however we only trust public keys which have been signed by an official CA. 
+
+This CA is typically a commercial vendor which verifies your identity (e.g. via a copy of your passport) and then uses their own keypair to sign a certificate containing your name and public key. The public keys of CA's are hardcoded in HTTP clients. The main disadvantage is that CA's are expensive and everything collapses if any of them is compromised or not doing their job well.
+
+### The web of trust
+
+GPG uses a different system which does not rely on authorities. In GPG, peers sign each other's keys, and it is up to the user to manage who they choose to trust in their personal keyring. For any given signature, GPG will check if it was created by a trusted party in the keyring, or by a third party which has been verified by someone in the keyring, and so on: a "web of trust".
+
+The easiest way to exchange (signed or unsigned) public keys is via a keyserver. GPG is compatible with existing PGP key servers. These servers mirror each other so most keys are available on either one.
+
+ - https://pgp.mit.edu
+ - https://keyserver.ubuntu.com
+ - http://keys.gnupg.net
+
+GPG key servers might not use HTTPS. In GPG we only trust keys only on basis of who has signed them, regardless of how they were obtained. For this reason it is also perfectly valid to share GPG public keys via e.g. a website or email.
+
+## Managing your keyring
+
+It is important to know which version of GPG you are running and where your home dir is. Your home directory contains your configuration and the keyrings. GPG defaults to your system keyring, which is the same as the `gpg` command line utility and system package manager use.
+
+```{r}
+str(gpg_info())
+```
+
+Use `gpg_restart` to switch to another GPG executable or different home directory, e.g. to build an application which uses its own configuration and keyrings:
+
+```{r}
+gpg_restart(home = "~/myapp")
+```
+
+
+Use `gpg_keylist()` to see the current contents of your keyring. It is empty to start with:
+
+```{r}
+gpg_keylist()
+```
+
+### Generate keys
+
+Use `gpg_keygen()` to generate a new public private keypair:
+
+```{r}
+(mykey <- gpg_keygen(name = "Jerry", email = "jerry@gmail.com"))
+gpg_keylist()[c("id", "name", "email")]
+```
+
+
+### Import from disk
+
+The `gpg_import` function reads an armored GPG key from disk:
+
+```{r}
+curl::curl_download("https://stallman.org/rms-pubkey.txt", "rms-pubkey.txt")
+gpg_import("rms-pubkey.txt")
+unlink("rms-pubkey.txt")
+```
+
+### Import from keyserver
+
+Use the `gpg_recv` function to download a given key ID from the keyserver. For example let's import the public key from Michael Rutter which is used to [sign the Ubuntu r-base packages](https://cran.r-project.org/bin/linux/ubuntu/README.html) from CRAN:
+
+```{r}
+gpg_recv(id ="E084DAB9")
+keyring <- gpg_keylist()
+keyring[c("id", "name", "email")]
+```
+
+Note that for imported keys, we do not have the private key:
+
+```{r}
+secring <- gpg_keylist(secret = TRUE)
+secring[c("id", "name", "email")]
+```
+
+### Export a key
+
+To export our newly created public key:
+
+```{r}
+str <- gpg_export(id = mykey)
+cat(str)
+```
+
+If you also own the private key you can export this as well:
+
+```{r}
+str <- gpg_export(id = mykey, secret = TRUE)
+cat(str)
+```
+
+### Delete a key
+
+Delete a key from its ID or fingerprint. Let's delete the RMS key:
+
+```{r}
+gpg_delete('2C6464AF2A8E4C02')
+gpg_keylist()[c("id", "name", "email")]
+```
+
+
+## Digital Signatures
+
+A digital signature is a mathematical scheme for demonstrating the authenticity of a digital message or document. If you sign a file using your personal secret key, anyone can verify that this file has not been modified (i.e. the hash matches the one in your signture) via your public key.
+
+GPG signatures are widely used by Linux package managers such as `apt` to verify the integrity of downloaded files. Typically the public key is shipped with the OS, and the private key is owned by the repository maintainers. This way we can safely install software from any mirror or network.
+
+### Sign a file
+
+Let's use the private key we generated earlier to sign a file:
+
+```{r, message=FALSE}
+myfile <- tempfile()
+writeLines("This is a secret message", con = myfile)
+sig <- gpg_sign(myfile, mykey)
+cat(sig)
+writeLines(sig, "myfile.sig")
+```
+
+### Verify a signature
+
+The `gpg_verify` function will see if a signature is valid for any of the keys in the keyring:
+
+```{r}
+gpg_verify(myfile, signature = "myfile.sig")
+unlink("myfile.sig")
+```
+
+Let's verify a Debian file. The [Debian page on CRAN](https://cran.r-project.org/bin/linux/debian/) says the following:
+
+> The Debian backports archives on CRAN are signed with the key of Johannes Ranke (CRAN Debian archive) <jranke@uni-bremen.de> with key fingerprint 6212 B7B7 931C 4BB1 6280  BA13 06F9 0DE5 381B A480
+
+Let's import his key so that we can verify the [Release](https://cran.r-project.org/bin/linux/debian/jessie-cran3/Release) file, which contains checksums for all files in the repository:
+
+```{r}
+# take out the spaces
+johannes <- gsub(" ", "", "6212 B7B7 931C 4BB1 6280  BA13 06F9 0DE5 381B A480")
+gpg_recv(johannes)
+
+# Verify the file
+library(curl)
+curl_download('https://cran.r-project.org/bin/linux/debian/jessie-cran3/Release', 'Release')
+curl_download('https://cran.r-project.org/bin/linux/debian/jessie-cran3/Release.gpg', 'Release.gpg')
+gpg_verify('Release', 'Release.gpg')
+```
+
+Looking good! We can trust the checksums in the `Release` file to be legitimate.
+
+```{r, echo = FALSE}
+unlink('Release')
+unlink('Release.gpg')
+```
+
+## Anonymous Encryption
+
+GPG uses public key encryption. You can use someone's public key to encrypt a message or document, in a way that only the owner of the corresponding private key will be able to decrypt. This is a great way to send somebody highly confidential data.
+
+### Encrypt a message
+
+For example we want to send an email [Glenn Greenwald](https://theintercept.com/staff/glenn-greenwald/) containing top secret information that may not be snooped by our ISP or government. His homepage at the intercept shows his GPG key in long form.
+
+```{r}
+glenn <- '734A3680A438DD45AF6F5B99A4A928C769CD6E44'
+gpg_recv(glenn)
+writeLines("TTIP is super evil!", "secret.txt")
+msg <- gpg_encrypt("secret.txt", receiver = glenn)
+writeLines(msg, "msg.gpg")
+unlink("secret.txt")
+cat(msg)
+```
+
+You can safely send this message over any channel (email, twitter, etc). Nobody in the world (not even ourselves) will be able to decipher this message, except for Glenn Greenwald.
+
+### Decrypt a message
+
+Decrypting a message is even easier, you don't have to specify a key. GPG will automatically pick the correct private key from your keyring, and error if you don't have it. For example we will not be able to decrypt the message we created above for Glenn Greenwald.
+
+```{r, error=TRUE, message=FALSE}
+# This will error, we do not have this private key
+gpg_decrypt("msg.gpg")
+```
+
+To demonstrate decryption, we encrypt a message using our own keypair (for which we own the private key).
+
+```{r}
+writeLines("This is a test!", "secret.txt")
+msg <- gpg_encrypt("secret.txt", receiver = mykey)
+writeLines(msg, "msg.gpg")
+cat(msg)
+```
+
+Decryption is simple, given that we own the secret key for the message:
+
+```{r, message=FALSE}
+gpg_decrypt("msg.gpg")
+```
+
+## Authenticated Encryption
+
+So we showed how to encrypt a message so that it can only be read by the receiver. But how does Glenn Greenwald verify the sender of this information? Perhaps someone is trying to leak fake documents? 
+
+### Sign and Encrypt
+
+In signed encryption, also known as authenticated encryption, uses combined encryption and signing. The public key of the receiver is used to encrypt the message, and the private key of the sender to sign the message. This way the message is both confidential and the integrity of the sender can be checked and verified, only by the receiver.
+
+```{r}
+msg <- gpg_encrypt("secret.txt", receiver = glenn, signer = mykey)
+writeLines(msg, "msg.gpg")
+cat(msg)
+```
+
+### Decrypt and Verify
+
+If the encrypted message contains a signature, it will automatically be verified when the message is decrypted. The function raises an error otherwise.
+
+For purpose of illustrating authenticated decryption, we encrypt and sign using our own key (which usually does not make sense):
+
+```{r, message=FALSE}
+msg <- gpg_encrypt("secret.txt", receiver = mykey, signer = mykey)
+writeLines(msg, "msg.gpg")
+gpg_decrypt("msg.gpg")
+```
+
+The signer fingerprint (if any) will be added as an attribute to the decrypted message.
+
+
+```{r, echo = FALSE}
+unlink("msg.gpg")
+unlink("secret.txt")
+```
