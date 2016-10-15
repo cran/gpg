@@ -243,7 +243,6 @@ div.tocify {
 <ul>
 <li><a href="https://pgp.mit.edu" class="uri">https://pgp.mit.edu</a></li>
 <li><a href="https://keyserver.ubuntu.com" class="uri">https://keyserver.ubuntu.com</a></li>
-<li><a href="http://keys.gnupg.net" class="uri">http://keys.gnupg.net</a></li>
 </ul>
 <p>GPG key servers might not use HTTPS. In GPG we only trust keys only on basis of who has signed them, regardless of how they were obtained. For this reason it is also perfectly valid to share GPG public keys via e.g. a website or email.</p>
 </div>
@@ -253,16 +252,17 @@ div.tocify {
 <p>It is important to know which version of GPG you are running and where your home dir is. Your home directory contains your configuration and the keyrings. GPG defaults to your system keyring, which is the same as the <code>gpg</code> command line utility and system package manager use.</p>
 <pre class="r"><code>str(gpg_info())</code></pre>
 <pre><code>List of 5
- $ gpgconf: chr NA
- $ gpg    : chr &quot;/usr/local/bin/gpg&quot;
+ $ gpgconf: chr &quot;/usr/local/bin/gpgconf&quot;
+ $ gpg    : chr &quot;/usr/local/Cellar/gnupg2/2.0.30_2/bin/gpg2&quot;
  $ version:Class 'numeric_version'  hidden list of 1
-  ..$ : int [1:3] 1 4 21
- $ home   : chr NA
+  ..$ : int [1:3] 2 0 30
+ $ home   : chr &quot;/Users/jeroen/.gnupg&quot;
  $ gpgme  :Class 'numeric_version'  hidden list of 1
   ..$ : int [1:3] 1 7 0</code></pre>
-<p>Use <code>gpg_restart</code> to switch to another GPG executable or different home directory, e.g. to build an application which uses its own configuration and keyrings:</p>
-<pre class="r"><code>gpg_restart(home = &quot;~/myapp&quot;)</code></pre>
-<pre><code>gpg (GnuPG) 1.4.21
+<p>Use <code>gpg_restart</code> to switch to another home directory, e.g. for a client which uses its own configuration and keyrings. For this example we store keys in a temporary directory.</p>
+<pre class="r"><code>gpg_restart(home = tempdir())</code></pre>
+<pre><code>gpg (GnuPG) 2.0.30
+libgcrypt 1.7.3
 Copyright (C) 2015 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later &lt;http://gnu.org/licenses/gpl.html&gt;
 This is free software: you are free to change and redistribute it.
@@ -270,23 +270,23 @@ There is NO WARRANTY, to the extent permitted by law.
 
 Home: ~/.gnupg
 Supported algorithms:
-Pubkey: RSA, RSA-E, RSA-S, ELG-E, DSA
+Pubkey: RSA, RSA, RSA, ELG, DSA
 Cipher: IDEA, 3DES, CAST5, BLOWFISH, AES, AES192, AES256, TWOFISH,
         CAMELLIA128, CAMELLIA192, CAMELLIA256
 Hash: MD5, SHA1, RIPEMD160, SHA256, SHA384, SHA512, SHA224
 Compression: Uncompressed, ZIP, ZLIB, BZIP2</code></pre>
-<p>Use <code>gpg_keylist()</code> to see the current contents of your keyring. It is empty to start with:</p>
-<pre class="r"><code>gpg_keylist()</code></pre>
+<p>Use <code>gpg_list_keys()</code> to see the current contents of your keyring. It is empty to start with:</p>
+<pre class="r"><code>gpg_list_keys()</code></pre>
 <pre><code>[1] id          fingerprint name        email       algo        timestamp   expires    
 &lt;0 rows&gt; (or 0-length row.names)</code></pre>
 <div id="generate-keys" class="section level3">
 <h3>Generate keys</h3>
 <p>Use <code>gpg_keygen()</code> to generate a new public private keypair:</p>
 <pre class="r"><code>(mykey &lt;- gpg_keygen(name = &quot;Jerry&quot;, email = &quot;jerry@gmail.com&quot;))</code></pre>
-<pre><code>[1] &quot;756C53BB8F92FDDD&quot;</code></pre>
-<pre class="r"><code>gpg_keylist()[c(&quot;id&quot;, &quot;name&quot;, &quot;email&quot;)]</code></pre>
+<pre><code>[1] &quot;0E7D600FE234C49B&quot;</code></pre>
+<pre class="r"><code>gpg_list_keys()[c(&quot;id&quot;, &quot;name&quot;, &quot;email&quot;)]</code></pre>
 <pre><code>                id  name           email
-1 756C53BB8F92FDDD Jerry jerry@gmail.com</code></pre>
+1 0E7D600FE234C49B Jerry jerry@gmail.com</code></pre>
 </div>
 <div id="import-from-disk" class="section level3">
 <h3>Import from disk</h3>
@@ -303,17 +303,17 @@ gpg_import(&quot;rms-pubkey.txt&quot;)</code></pre>
 <pre class="r"><code>gpg_recv(id =&quot;E084DAB9&quot;)</code></pre>
 <pre><code>considered   imported  unchanged 
          1          1          0 </code></pre>
-<pre class="r"><code>keyring &lt;- gpg_keylist()
+<pre class="r"><code>keyring &lt;- gpg_list_keys()
 keyring[c(&quot;id&quot;, &quot;name&quot;, &quot;email&quot;)]</code></pre>
 <pre><code>                id             name              email
-1 756C53BB8F92FDDD            Jerry    jerry@gmail.com
+1 0E7D600FE234C49B            Jerry    jerry@gmail.com
 2 2C6464AF2A8E4C02 Richard Stallman        rms@gnu.org
 3 51716619E084DAB9   Michael Rutter marutter@gmail.com</code></pre>
 <p>Note that for imported keys, we do not have the private key:</p>
-<pre class="r"><code>secring &lt;- gpg_keylist(secret = TRUE)
+<pre class="r"><code>secring &lt;- gpg_list_keys(secret = TRUE)
 secring[c(&quot;id&quot;, &quot;name&quot;, &quot;email&quot;)]</code></pre>
 <pre><code>                id  name           email
-1 756C53BB8F92FDDD Jerry jerry@gmail.com</code></pre>
+1 0E7D600FE234C49B Jerry jerry@gmail.com</code></pre>
 </div>
 <div id="export-a-key" class="section level3">
 <h3>Export a key</h3>
@@ -321,55 +321,57 @@ secring[c(&quot;id&quot;, &quot;name&quot;, &quot;email&quot;)]</code></pre>
 <pre class="r"><code>str &lt;- gpg_export(id = mykey)
 cat(str)</code></pre>
 <pre><code>-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v2
 
-mQENBFf/TDUBCADGjhZ6vhWlRWndV6GmH3uWC4bxzaTE6tOjzm1KJf5ujzrvH9kp
-XOfWkuWt6slBLAJTJzCowQRYx1ROLGbKoudpTs9KjO3CvPjD/b+MQR9TnzpiTa5y
-tEhclv8y9F17jY1pZrnp/oOBfyYtNbcK489Vy7yFbkOJu23OWdpsRb8jthZu/2qZ
-cF7tyHR3JFMymtoM6SB741hheGkNqDexi0u+1sHPRsAB5GiamWiWsZRIewwniWgo
-a4HAQucBXdt0x7SuZGTQ4FnFF5M2RJPatyWNeD20ja+C/IZDtKEAKBeXDpH5npzF
-X+M0r1jMamVEtzxH/KXk8aV8CPpsN7UznxEXABEBAAG0F0plcnJ5IDxqZXJyeUBn
-bWFpbC5jb20+iQE4BBMBAgAiBQJX/0w1AhsvBgsJCAcDAgYVCAIJCgsEFgIDAQIe
-AQIXgAAKCRB1bFO7j5L93cTmB/99pbivoKpHQmAfp0rK1k2j2ae4nLeRUBQU8nWa
-S66Dm3iwCvWi7JdmIwSpC6kbo8wAedvr61F899RE5vgDRgp7aEznmPugdBUV61qs
-1P58gl7flqStkURIwJ8Lf6ZOUl31Z63OtGahav9Sgi+LWa0eGiLYe09vJ4IPH9aF
-wSTDKMzEALvzPLxJ+yaAOoB0jlQYmeHUuuKcEo4x9tw7rShHr1RbtI0rh2Fw7i0s
-BeBvXlbNky1obYxS/53L9VDAWGjuuY7wHrbjjMpyn4g+hWTYzbrehmmNxQMGLIET
-KuGZMjXOoDmQWWqT71ROXh8eTv3vuBe5EwIfJfu5lbcTgtV4
-=eZxb
+mQENBFgA6oMBCADHqziSGHibhcJok2LG5p0A0lxdUIurOCUg7P06VYJeKW8hvkPx
+SOVQetYvm7FGNim0pR6m7WuZkTUoqge2wopGzOb5ecyfDxd0WvSTHxb2l3IXIlDW
+F1woy+oT090YM6JDgsnbTHAXUqS/QW0hHZKECP/ktkH9ZJcIs2sMZ3UrnTwDT18q
++FGmKQVg5M1GPCciNe6upwto7+xWka93ebe/P3WW9JrjAoIXLPX3pX4Ii4RfiW3u
+p2RCeJglDAfOPTGKSAxIQdF827Sm3bmbCXTnhWzcRWSpHqC4Eka8j7gNNBZxkvF0
+k1lRY0A0SagIyclfHZJyN/UeSUc7OkfxquGxABEBAAG0F0plcnJ5IDxqZXJyeUBn
+bWFpbC5jb20+iQE5BBMBCAAjBQJYAOqDAhsvBwsJCAcDAgEGFQgCCQoLBBYCAwEC
+HgECF4AACgkQDn1gD+I0xJshewgAmOuhMjYIeiU3FMEy12MoqDdNQRh61aEwSIWo
+O1RFwNJm0+yEIojUVwcQEwCgzLvJB5Qv+Zc6X3FcNeY1JbBcauVCuuLpNglNMFGM
+ssZhiIkRGWQ2OiJCnNkzJxI4hEvoScuaTrUrTw1SW5kS5yuJZyT3mIXcp63H29Uy
+7LyQJnSxuYq8YwWZepfzU+DHuQ/lgsQPXkKlcS5fxEopuUpt2sELb/Q1AuScBIAu
+IYbhPOAZcY6VB2PgELuO9r6+BrJUsVqdsCYluhBv9LT4/z57Nwd+oHtCJARjJqsr
+Gb6018dyrRioTO+5nSihuj97rdRSjCyba1YGGd9yXg1GVqbpuQ==
+=H9HW
 -----END PGP PUBLIC KEY BLOCK-----</code></pre>
 <p>If you also own the private key you can export this as well:</p>
 <pre class="r"><code>str &lt;- gpg_export(id = mykey, secret = TRUE)
 cat(str)</code></pre>
 <pre><code>-----BEGIN PGP PRIVATE KEY BLOCK-----
+Version: GnuPG v2
 
-lQOYBFf/TDUBCADGjhZ6vhWlRWndV6GmH3uWC4bxzaTE6tOjzm1KJf5ujzrvH9kp
-XOfWkuWt6slBLAJTJzCowQRYx1ROLGbKoudpTs9KjO3CvPjD/b+MQR9TnzpiTa5y
-tEhclv8y9F17jY1pZrnp/oOBfyYtNbcK489Vy7yFbkOJu23OWdpsRb8jthZu/2qZ
-cF7tyHR3JFMymtoM6SB741hheGkNqDexi0u+1sHPRsAB5GiamWiWsZRIewwniWgo
-a4HAQucBXdt0x7SuZGTQ4FnFF5M2RJPatyWNeD20ja+C/IZDtKEAKBeXDpH5npzF
-X+M0r1jMamVEtzxH/KXk8aV8CPpsN7UznxEXABEBAAEAB/9h3sfV2LxyqrR0Fi3n
-5LzWSPhLWEJPjjCkHaxhUDkJ5i/2joxMhy7/5YixIXnyVe8PbdHeXMX3vMkhf2Fr
-oMDQd7hV1wGba+pzMTCpwa/fWC0/J2tFvvesLAG+7BToQe3idnBNltbbjgETZ9bB
-12jrsXFLk/5Wdby6ai/wDrEYuFigmmLc8r41oiTPeAmSpmAXU9RKtGN/GVxsMhLe
-QsUK1VLrUSzGjxNMLAc3QMppGRb031LByHqLsCP4Wq2h7aqaSM7Y83CXpTia219T
-DsACZh4hhU5+RGGyqh8C1eFEpRbl1Fuc9g08XV2ZuQtyzjnlRfjIRPO/koV7+UjG
-MBqBBADILs4kxag1QayXHunpX4QjRyc44K3pyQ43BWqrafODEWTB+J9/7GizG9CL
-YCjoAZM1Z1AqRpc2L//xYccP5x7PdUMPqzJmyk0UOZ4LRu/T1evFKbp9T5p3SyUp
-oV0Fi8GPxO/B5ldfaCKqZOmcl/JJPtB4VKfSrUFBBAM6LbQgnQQA/esWvrtkijlb
-LflIivXUwjPI6cX/LYWMFdbtzRHJdicWN5+XdqvlQF+5ny8dxW5PrxR+KHHoGrbZ
-d+bb2eh7h7ZAEk/iXeg7mHjg59AmAtdTaKHf4CLAA6FbuHDCanbF4Ud8gXhQ1ZAc
-Y2l6qB8P6V8kFBd4Y5KArcD4uOdKKEMD/28F0Lh1cNh2SGc0RC+J3a5BpLJOlNF0
-zw9sAxy1acb4Ju7Jb84angTgw6nYrF96qAP1QngNJU62+1bs5LwwVJ7K81Z//ZVm
-f0iyjBBZfFILzP2cS8jvVfW1yvop8YKyljoKEBLvo1IN77YjoQLtuRUOKGuMwJkI
-Sl7VksvUUrbKR/60F0plcnJ5IDxqZXJyeUBnbWFpbC5jb20+iQE4BBMBAgAiBQJX
-/0w1AhsvBgsJCAcDAgYVCAIJCgsEFgIDAQIeAQIXgAAKCRB1bFO7j5L93cTmB/99
-pbivoKpHQmAfp0rK1k2j2ae4nLeRUBQU8nWaS66Dm3iwCvWi7JdmIwSpC6kbo8wA
-edvr61F899RE5vgDRgp7aEznmPugdBUV61qs1P58gl7flqStkURIwJ8Lf6ZOUl31
-Z63OtGahav9Sgi+LWa0eGiLYe09vJ4IPH9aFwSTDKMzEALvzPLxJ+yaAOoB0jlQY
-meHUuuKcEo4x9tw7rShHr1RbtI0rh2Fw7i0sBeBvXlbNky1obYxS/53L9VDAWGju
-uY7wHrbjjMpyn4g+hWTYzbrehmmNxQMGLIETKuGZMjXOoDmQWWqT71ROXh8eTv3v
-uBe5EwIfJfu5lbcTgtV4
-=6wKW
+lQOYBFgA6oMBCADHqziSGHibhcJok2LG5p0A0lxdUIurOCUg7P06VYJeKW8hvkPx
+SOVQetYvm7FGNim0pR6m7WuZkTUoqge2wopGzOb5ecyfDxd0WvSTHxb2l3IXIlDW
+F1woy+oT090YM6JDgsnbTHAXUqS/QW0hHZKECP/ktkH9ZJcIs2sMZ3UrnTwDT18q
++FGmKQVg5M1GPCciNe6upwto7+xWka93ebe/P3WW9JrjAoIXLPX3pX4Ii4RfiW3u
+p2RCeJglDAfOPTGKSAxIQdF827Sm3bmbCXTnhWzcRWSpHqC4Eka8j7gNNBZxkvF0
+k1lRY0A0SagIyclfHZJyN/UeSUc7OkfxquGxABEBAAEAB/9DBHBHcRlCMiIvkZCs
+7Ai0lubTl05Z2M11gLX6F2tbiZK4g7EwUmRNn/02G47j3xgefvGL29Kqx7dM/8z5
+BdD9tJauE7ifhqQ7tK+0ldHSUMDFjQoO4eZX9yGJKCpkjigfes2f4scYvO95Fk+3
+tsJPuOmS7a22jEW5cOc0UaFdUqAGS5hITCCjenk0ypHaMKZHBCEb4YqKO4Qb54ZE
+nCXbHU+yjLmJnYlievp2+FGlTrhKRbZt4KpKodBDNolH0UML6twvSYCfqXguRV1H
+f9WHyf9V9qrJbUEKso4QkYxrdyHzOmEBfXzqmhmp6wXsTVIEqKDNbi0U6Cd1heBl
+z2JlBADSymWymq57Oao3F+hgFOWMQshlvXMUA74nVn2OZ/Ku/Hm+mwUH6pD2yAPg
+/JS6ldl9SRMF3eAwMxkFvrHLki0y4wTmTArbpcY/QfWCErcou4Zu1xOliavgw4xO
+ARDPGHK/OxKjo1simKCkNaXymmG1AE+Z3ZH3EZ42vsA5FMb1GwQA8n4stq2icx8r
+5pUB+2NUP6iM2ehE5Qt9CjHVy1V9cGrAp4rMZD16nyzND7KcMMp56gcio9fDQZF5
+Bnn2+ymoFMByqjm8jaq9/VQVe24NpRoRRicbdnpILzPxdmXGbOI7mqmJ2yNvmw0r
+iLXcANphcTTdknf2Czv8QhRNNNFfDSMD/0jH6PD5SrF06D8zXbHEMRTc7QHGr47g
+rNK1XvqBi9tOw6j8lHmkVq37XPZIgufE6AYkkumfzJZzOrgfXx6a/xJzPVAwlgWx
+Z9XMqkbiYwgwAEsylWXCIr1GGbMwyuZLzYK9SHiUEpP57Ybeeg+NzVVkmMOkb6Ku
+UzVR4M+26f3fRxK0F0plcnJ5IDxqZXJyeUBnbWFpbC5jb20+iQE5BBMBCAAjBQJY
+AOqDAhsvBwsJCAcDAgEGFQgCCQoLBBYCAwECHgECF4AACgkQDn1gD+I0xJshewgA
+mOuhMjYIeiU3FMEy12MoqDdNQRh61aEwSIWoO1RFwNJm0+yEIojUVwcQEwCgzLvJ
+B5Qv+Zc6X3FcNeY1JbBcauVCuuLpNglNMFGMssZhiIkRGWQ2OiJCnNkzJxI4hEvo
+ScuaTrUrTw1SW5kS5yuJZyT3mIXcp63H29Uy7LyQJnSxuYq8YwWZepfzU+DHuQ/l
+gsQPXkKlcS5fxEopuUpt2sELb/Q1AuScBIAuIYbhPOAZcY6VB2PgELuO9r6+BrJU
+sVqdsCYluhBv9LT4/z57Nwd+oHtCJARjJqsrGb6018dyrRioTO+5nSihuj97rdRS
+jCyba1YGGd9yXg1GVqbpuQ==
+=uCsd
 -----END PGP PRIVATE KEY BLOCK-----</code></pre>
 </div>
 <div id="delete-a-key" class="section level3">
@@ -377,9 +379,9 @@ uBe5EwIfJfu5lbcTgtV4
 <p>Delete a key from its ID or fingerprint. Let’s delete the RMS key:</p>
 <pre class="r"><code>gpg_delete('2C6464AF2A8E4C02')</code></pre>
 <pre><code>[1] &quot;2C6464AF2A8E4C02&quot;</code></pre>
-<pre class="r"><code>gpg_keylist()[c(&quot;id&quot;, &quot;name&quot;, &quot;email&quot;)]</code></pre>
+<pre class="r"><code>gpg_list_keys()[c(&quot;id&quot;, &quot;name&quot;, &quot;email&quot;)]</code></pre>
 <pre><code>                id           name              email
-1 756C53BB8F92FDDD          Jerry    jerry@gmail.com
+1 0E7D600FE234C49B          Jerry    jerry@gmail.com
 2 51716619E084DAB9 Michael Rutter marutter@gmail.com</code></pre>
 </div>
 </div>
@@ -395,14 +397,15 @@ writeLines(&quot;This is a secret message&quot;, con = myfile)
 sig &lt;- gpg_sign(myfile, mykey)
 cat(sig)</code></pre>
 <pre><code>-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
 
-iQEcBAABAgAGBQJX/0w3AAoJEHVsU7uPkv3daQoIALIEijsgXhrnF4aNbYqbVTyd
-p78zSiGLExlgAxCs41+YkVpvmxW8gLzRNI3q99I6yRbFrziQ3pH7VaEhRFkXyLQl
-B9Z5INraMe7QHSQbca0yE8LKQlfXYd37JBdbogEXh/Y/W5Go2xMVDsMIigh+BzT9
-5QV4c6XzQjSemIB2pLQcnaiJganzsPZNTVUkz0mzcV81O/dLBjpSA6Ic1BaB628U
-GChTU8kk/pEVAotM+o5ahh73xMVO3+5D9wgoN0V6aqKXEXeEjc0y10tLDDnp0Ki5
-X+EkkwvR/LZrOJSdohxN2qSdK5rIN8AR3QzaKSOauD0NpPUMK37d9k9RtRseGng=
-=Tna1
+iQEcBAABCAAGBQJYAOqEAAoJEA59YA/iNMSbMyAH/is6uYJhNMd4B09G+hftavSy
+EFJ9qLhcpMnffuAVaq8MB9Br6rGU17OJvLxVgxt68vbN+sCtHmDYsjwrHeIX1MPz
+cd6PW8Qkxb/QxCShbbqJ6u3C0ADCeNF6lplai9uxBVxpmguqXNpsL9gQuRLhZ6OF
+Zpg9rUIJdIxx4a0tVQJTbMRgGSQ8N0EvbbR5Zrz/m6ug3PTcx5G1tmI/stPPOgSl
+PkplJASw9zXIx/ugC3hJrkUk4GSRzP44TGVdXlKz7M1uiagkbJy3zIViYhRn/Mh0
+Zl09l+yQ5omAyh2jBF4ZldLcaRTDfH90EWfvQ9pza0yyKZlvyuYlluZcwb4lJQ8=
+=hEcd
 -----END PGP SIGNATURE-----</code></pre>
 <pre class="r"><code>writeLines(sig, &quot;myfile.sig&quot;)</code></pre>
 </div>
@@ -410,8 +413,8 @@ X+EkkwvR/LZrOJSdohxN2qSdK5rIN8AR3QzaKSOauD0NpPUMK37d9k9RtRseGng=
 <h3>Verify a signature</h3>
 <p>The <code>gpg_verify</code> function will see if a signature is valid for any of the keys in the keyring:</p>
 <pre class="r"><code>gpg_verify(myfile, signature = &quot;myfile.sig&quot;)</code></pre>
-<pre><code>                               fingerprint           timestamp hash pubkey success
-1 5D72313BFCD83F17268143C3756C53BB8F92FDDD 2016-10-13 10:56:23 SHA1    RSA    TRUE</code></pre>
+<pre><code>                               fingerprint           timestamp   hash pubkey success
+1 459AB4E97A1E2B31D76478D00E7D600FE234C49B 2016-10-14 16:24:04 SHA256    RSA    TRUE</code></pre>
 <pre class="r"><code>unlink(&quot;myfile.sig&quot;)</code></pre>
 <p>Let’s verify a Debian file. The <a href="https://cran.r-project.org/bin/linux/debian/">Debian page on CRAN</a> says the following:</p>
 <blockquote>
@@ -449,21 +452,22 @@ writeLines(msg, &quot;msg.gpg&quot;)
 unlink(&quot;secret.txt&quot;)
 cat(msg)</code></pre>
 <pre><code>-----BEGIN PGP MESSAGE-----
+Version: GnuPG v2
 
-hQIMAzCzOshC83uFARAAiBXEr9rN7phsBdQIbpn7AsVA415ebv5PWXbElaVYAGhA
-LXMfpJqaCdQHtrZbhhU93oqUhTKet55eZZ0G5PZp7zDC9p3RJomnuOxjTWOhlmZD
-Qh1JTEvX532lXPwsjL3n6vP9Q+FuMIyEHDvapphCy/qJxsTkKP6498KqKKXRNFuQ
-Ts9VgnYAVVN/R1/I4PmuIbit8jEbUO9bI9iocaUdiKbZ+9HPzNmkqcPqytFsUhBm
-zY6qGWKK1K0sB7jBpS6zHYa+P0glx/AUVUYJ0n1KcenZWY38ml1epP2wU1QkMg9q
-d902elCALmnD172qPz1YS0PSYEXXNPuh6K64blIixr8D6N/2yZ/ufI0bnqApz3Uz
-7iiETPZlDgbb9LbCAHfqsGoi62LYzeKvTPa4OFvOgBmbUAPX1xw88oJWxXLtAra/
-G+b70plZSCbZIG1hKvPqIgly4VE/kk861FT1zqX9rmR/EiZstLkT877NG35Iyxme
-m6trD1bYuFgnXRadVGNmysstyPoTFjZUp5GJ/QPVINkSF5ukEfDXt/d5DHVQQe8l
-Sa8GjuyMTxVtlsOaHv4bgW0NLQT9mMNBbvbmIilSsU6YjuTjkgGlny4l6j9C2CbG
-d3ikSnWK17iNkwYcBH0SRLWcc0OrUyDF4b3x3dMrdqgRTx+y0LggfwQQaZGpIjrS
-UwG72npFcit1YYaJNhvGGXernfDGQgDAE75FHRywtkOOEfJWm2M7wtLCD2UEGyFt
-nHrCbfP/bbk2dxC1asc7THTzy+COFK6AJUCYA08yoH5PLH7U
-=Fhu5
+hQIMAzCzOshC83uFAQ/+OTJsUScxxCwBHAGE+ruZk8ZUd2z4+Sz0FKk/lwP7g8Am
+IO4gc6T/yKC+qR/eeaXLP2FQKsG/qzmrByZEZhkvgObIWL4Tr/KUeSFbdz3xcAUs
+8M9kPrvtnz7hI6dygasILHzoa7YZe62+1M7UiIG4K54gNFfr7VcOib+gNNDoXeif
+GyMT46/67dd9PPDXA0dVbZ/ZKCLO4fUInPoT7caYzSsadACp1l/HOf5J3UWlHz61
+FguDeqpR8fhM1xJ7pzc5BUdjUmX0pV/5DupuyLHgn2WF7WTILgTcdX/wjPRP7qbn
+X+8ZGKA7676xxyNN6bmEJoqh+hvb7ieEYUVRcMci8TegOW+wvo4h1NtA3Y6L5eb4
+fus43xIZ+ZLqhSkTeu5ZQEpj2clt5CrtHskliigK6dYK9zMYTeQ9e3Gnbf4eDjFq
+kjkwDHlFKxu/IkkDsrtQgIlxAFvhvc3Ar3fr212EyWwmdmmdlDvZ3F3rO6gpZJ+R
+V7TQYiQS0E/oUXqmJRJCm7pFpLHRI/olOsMjXUsZDkESTzqN2WBy+RY4FK/R7iNC
+SNCIXfxbHjTNgHctzhKK3La9bBIh7RpVydACzY6VdtKFlKJBcLbrH77QgjoBvWk5
+PqjVAZonputklXjKfDeO3sQ+7UUrcxrtF/skZjnYTbUmqymC95hMhZFErgUj8xLS
+TwGBzmbW20WtuhukGqxaRdvv2m9hfFHvZ80Qkoc5m0cY8kwbmOZWIOtWgyXVxac8
+nMfh5IMaaI53XUwNZxrWsNwYZ/OfyRhZdkS8dKos4Ds=
+=OcB/
 -----END PGP MESSAGE-----</code></pre>
 <p>You can safely send this message over any channel (email, twitter, etc). Nobody in the world (not even ourselves) will be able to decipher this message, except for Glenn Greenwald.</p>
 </div>
@@ -479,16 +483,17 @@ msg &lt;- gpg_encrypt(&quot;secret.txt&quot;, receiver = mykey)
 writeLines(msg, &quot;msg.gpg&quot;)
 cat(msg)</code></pre>
 <pre><code>-----BEGIN PGP MESSAGE-----
+Version: GnuPG v2
 
-hQEMA3VsU7uPkv3dAQgAkqAkV83R9Finj+3feRRvqu8RymLMP54uVyC2EuWlq6Zk
-zGjj28/fw49fHXDlDQdXFwx6VUwRY6cAoL8hLp29WozGJXZswRjKeoi6gv3AWmlU
-VmuocxJ0ypFQtfXgaXzc++K6/iLXnikEkY4WmafvqE+ERb6H/IJ66GgyEL4lhWkg
-bMwUmscUcld38J/OPwcFINkFDDjfG/2c/nzBjECcNqMUAlPhYHezSmgUt7Dtj5fT
-kFcEVe14VXK05w9Jfi1ZwsTLqROJgeZMNeGHFwdKykMdM7qznqOhRmWIySUvJWnK
-rvBdGhP003rdSmnrnKQx6eBQv6zgiFmyX1dGYeJW/tJNAdOmURDYWq5dplKOk4n1
-pRz5KWwD8X9zdmhN4BBDDGKhOdadEuusIlW2RtRIyxGY4+qEzws96SccjcFFGRkC
-40NqEu3w+MJeTCbZdA4=
-=UETx
+hQEMAw59YA/iNMSbAQgAndFvuEYC0vxnQQI0CBqp7gbNOw4CpmJ7v75pYTuumbu0
+xNFrGN9qJ9P3G2dE43AHpDz78sZOMlLXWghLC6OYrS+fR+aydtcKPjKylTNENDzf
+TQmTL/EXZ0GJ3AelGXJIO5jbgU56idl69/6hOR3dYSFuyGMA2YJhSzToCC0/abFB
+rz6eRXLcJwI1727d5uj6kGbTPlK3ztFAcfpaSH/6zPdGu+95stGzwS0W8Y8UV+e9
+njZkIG8bd5/sW552X6n6sD0Y1sUd+tLqVbFkwoFcltvQIcv4ehOBWtAQElt45rNT
+MPGeKbK7iCe66qbdKTrhjz/HL4GzDC5tjSWk51XzsNJJAYvIQDrxK311dTaD8OMy
+EyF/j9peSa7tlt54tDzLHLTdVybW8xpJxDOaooCw5iizdeTQNG+IG67P588RfzZ0
+IDJuNNbzVzm0Bw==
+=a2/T
 -----END PGP MESSAGE-----</code></pre>
 <p>Decryption is simple, given that we own the secret key for the message:</p>
 <pre class="r"><code>gpg_decrypt(&quot;msg.gpg&quot;)</code></pre>
@@ -505,28 +510,28 @@ pRz5KWwD8X9zdmhN4BBDDGKhOdadEuusIlW2RtRIyxGY4+qEzws96SccjcFFGRkC
 writeLines(msg, &quot;msg.gpg&quot;)
 cat(msg)</code></pre>
 <pre><code>-----BEGIN PGP MESSAGE-----
+Version: GnuPG v2
 
-hQIMAzCzOshC83uFARAAhLZsvVeF8hzpwgGiVBytVMBmwZ5m4SRaVpVUKNbSsDbT
-7CehpWTQnTd3x3dtuEU3KmoYdNxm6MmoTjUV3Gxo+A0rYM+zdYwNp5A1Qsc+1jrk
-V94Km30QoKFRHnPykV6d2FoN8B1G52cWFj74kzM1ajVTq9eVPtmaOwgGKweFG2Cj
-BMAIaYdnVOV2V8B4Cis9UlCo0uHIJhtzA0fn/U3bU0mYXKR8Y6AR3Cjwv1NuDIOr
-XY3EWzpOpAGABFM5uMVCXIRhdClluCJabOZGi/c4/Nijq/+Gb3D7AMm4OqX0I2cN
-VAAPjg1b1Zb7v6dGMXGT+jN5TVxJgMchqfQL28iGZG/7UZGrO54jrf0AtZnV8U8V
-5pigojAw8xnr4It25kYUwMRJAByZxgedpr8sojXH9szbYDsy6iRMDVuGXNd5ukBb
-pGgdnWZpNGVnu9piwEXvQUNMeKTyIAcnsLGxEQKGpOQNFsorawOu3WyY0b3IlH6o
-3RtjrNAZ7SGsmqgyid/JLyRV+j7QhqhUywEv2gD9Y2I+ZzSc/z4WOpcoJ/et7Msh
-9UFUoDWY7kn0zbVM9NC2VR9oyGf/fOKTrTMZQrf5iQFo7WOIk4xodM9h3FbGecQV
-mvY4hD7lMuJs313MT/hEFWcEq8/gpM5q1VXeJXSmHHW5qvp5SIvo3VAZ8hqUTgrS
-wMAB0RH7IYmaKaGccherH/qMKnODd4aY5qIyi4FA8x/hlgMdaPSjz9SKtgb1oDeu
-43Vh5Q5ZMc5FdgVWCWAfckVDHdE0T2vcMs+AXQyc381r00XPDpEZiQjUkqy3s6T3
-UmKIq7aXUGNgN1Y5kdDlXL7DyHHDPxmONc4361plg+w9gyYltYjwThCz0u3+maII
-GZrSzWLNSNxvVTjOqU+Cmq7KERYbDUms/gs2PtkzjSy0G0ygnxmrOB6Ygy0+GX2b
-EWtxyOrcJ63EfIJUTPb7CIxwsv4d/BMNZLcbbUr6RSTk1XFyy5Vf1L+wkG2KBK6p
-P0AWF08m0yUtK5K1jMoG2j4L8cVuB04lIzILVNMq8EPNY2tYYOsmR6dT2gjSAk2C
-yuoll+0KstigG1MVL+tbrgpN3bbGxmV9DUWWdFwGXB79mv18HZSKdG5cloxd47ZX
-AaPzmylRfR8s760U2V7fqtwIxZfJgVdpWaZdBDoEg3M5RRlsraSkCWPK0WPbmWeQ
-xyY=
-=wf2i
+hQIMAzCzOshC83uFAQ/+NC74T0yPgbN1hkIRoP9uz8I6isucVI1xTwYwC+fFSMCY
+RprHzCP+oLRQvqiHp1sSeiwE+ppTknlQIWt8vrXYIP7hgehTb7lVWZMNoFV60EwO
+qaoP0qhFNeHmYnHAHL0PXLDQ/qECGLVlpZCdUFXXh6MMvEiX1EW9eNWoPLi3pmB5
+krQWi7MkRuL3zNo2sYlTFYiEpa22bZYQWGwtFn2F19C3A8Fzi9GnVN+579Y1ceB/
+7bo7dWm6qzN6Ra3WYPtLVtwhxdxFN4OloEff7u9EldVDrx/TaNDtfSueSHf9hCLZ
+WzlEXAllrY+6kF4EJ7jVbYrAwTgVFmKUK/o6VgqUwREe5la9fWq/UUJmgXldx5vp
+tyjIgL/0bXFeAKZ9/VoFKB4lDfoWvkm33lOQNaLWPHPpoIN0ac6aXjCo3xQnFLQQ
+5YCnNgPTzzbD1j7OkHPnDuGke4naNYuIXcpaKLTei6K72/51JGznNIipZgyqueoJ
+w9COV6444di6xS4sRYqbFzaobBR/SkA7RlSoCJmRVAD4JH8Uv5JWQtkdmKpyAjyQ
+DCa5gqn2k7tLFQntU8vWzWuu7yhMFPf0x4GCAiUQBx1mzCrXjWXLF2DMW6m3q505
+mllKFrPl0J7l9cE1R0vyoSdMtN8fxf/k69PMDu57d2+Xow+EJWobdTIMwVCemMXS
+wLwBsNGFJ0H7YPhFyD/ZBx6AZ0nMV7YLdxpxi2tdoDGMohDvTDpLJEvY57f0byrN
+eqcagLYDags2ZwHlwaGJnxzJ1Rk5DT47A10W48FPFEuLPNzAA/oVsm0xdKZp4yen
+4rCk2DbU50W5diHrCPLI5mHj7JHb9rmC1QEkkFi/ttzknuaZP/EzxDGyigG62nkz
+7z1YFpzhdK7H7J/Mevgge+vrhNzPupwRRvLInJFuRO0fJO99F1HkaQuZ/4ALLgZE
+4rRB6LP4MrysF40+iXWQixdapf2z5C5MVyNa05aFiopxKSjw24fYrCN+eqXuUSIv
+zgvVvYyvMp+QsYTM4irxpaPbK02d2lq2ftx4JeN10jyIGL+LDpUqcsz8YRv2aI2j
+fdiNvTwQoP0Y2+A/BpI1PQgozKvjJoDqIELLiHhi25MvzRVA/HtbAt1DTFbmHUKS
+5qP9bM9HChmFYCNI705qTZOl/E23vc3soAui63u9xZ4m59b6wytHMmcYBCU7Lg==
+=9r9F
 -----END PGP MESSAGE-----</code></pre>
 </div>
 <div id="decrypt-and-verify" class="section level3">
@@ -538,7 +543,7 @@ writeLines(msg, &quot;msg.gpg&quot;)
 gpg_decrypt(&quot;msg.gpg&quot;)</code></pre>
 <pre><code>[1] &quot;This is a test!\n&quot;
 attr(,&quot;signer&quot;)
-[1] &quot;5D72313BFCD83F17268143C3756C53BB8F92FDDD&quot;</code></pre>
+[1] &quot;459AB4E97A1E2B31D76478D00E7D600FE234C49B&quot;</code></pre>
 <p>The signer fingerprint (if any) will be added as an attribute to the decrypted message.</p>
 </div>
 </div>
@@ -560,15 +565,6 @@ $(document).ready(function () {
 
 </script>
 
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-    document.getElementsByTagName("head")[0].appendChild(script);
-  })();
-</script>
 
 </body>
 </html>
