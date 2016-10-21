@@ -12,7 +12,7 @@ gpg_restart(home = tempdir())
 ## ---------------------------------------------------------------------------------------------------------------------
 gpg_list_keys()
 
-## ---------------------------------------------------------------------------------------------------------------------
+## ---- warning=FALSE---------------------------------------------------------------------------------------------------
 (mykey <- gpg_keygen(name = "Jerry", email = "jerry@gmail.com"))
 gpg_list_keys()[c("id", "name", "email")]
 
@@ -44,31 +44,41 @@ gpg_list_keys()[c("id", "name", "email")]
 
 ## ---- message=FALSE---------------------------------------------------------------------------------------------------
 myfile <- tempfile()
-writeLines("This is a secret message", con = myfile)
-sig <- gpg_sign(myfile, mykey)
+writeLines("This is a signed message", con = myfile)
+sig <- gpg_sign(myfile)
+writeLines(sig, "sig.gpg")
 cat(sig)
-writeLines(sig, "myfile.sig")
 
 ## ---------------------------------------------------------------------------------------------------------------------
-gpg_verify(myfile, signature = "myfile.sig")
-unlink("myfile.sig")
+clearsig <- gpg_sign(myfile, mode = "clear")
+writeLines(clearsig, "clearsig.gpg")
+cat(clearsig)
 
 ## ---------------------------------------------------------------------------------------------------------------------
+gpg_verify("sig.gpg", data = myfile)
+
+## ---------------------------------------------------------------------------------------------------------------------
+gpg_verify("clearsig.gpg")
+
+## ----echo=FALSE-------------------------------------------------------------------------------------------------------
+unlink(c("sig.gpg", "clearsig.gpg"))
+
+## ---- message=FALSE---------------------------------------------------------------------------------------------------
 # take out the spaces
-johannes <- gsub(" ", "", "6212 B7B7 931C 4BB1 6280  BA13 06F9 0DE5 381B A480")
+johannes <- "6212B7B7931C4BB16280BA1306F90DE5381BA480"
 gpg_recv(johannes)
 
 # Verify the file
 library(curl)
 curl_download('https://cran.r-project.org/bin/linux/debian/jessie-cran3/Release', 'Release')
 curl_download('https://cran.r-project.org/bin/linux/debian/jessie-cran3/Release.gpg', 'Release.gpg')
-gpg_verify('Release', 'Release.gpg')
+gpg_verify('Release.gpg', 'Release')
 
 ## ---- echo = FALSE----------------------------------------------------------------------------------------------------
 unlink('Release')
 unlink('Release.gpg')
 
-## ---------------------------------------------------------------------------------------------------------------------
+## ----message=FALSE----------------------------------------------------------------------------------------------------
 glenn <- '734A3680A438DD45AF6F5B99A4A928C769CD6E44'
 gpg_recv(glenn)
 writeLines("TTIP is super evil!", "secret.txt")

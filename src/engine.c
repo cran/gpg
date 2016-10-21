@@ -4,7 +4,7 @@
 
 void bail(gpgme_error_t err, const char * msg){
   if(err)
-    Rf_errorcall(R_NilValue, "GPG %s error: %s", msg, gpgme_strerror(err));
+    Rf_errorcall(R_NilValue, "%s %s error: %s", gpgme_strsource(err), msg, gpgme_strerror(err));
 }
 
 /* password prompt only supported in gpg1, not in gpg2 which uses the 'pinentry' program */
@@ -23,6 +23,9 @@ gpgme_error_t pwprompt(void *hook, const char *uid_hint, const char *passphrase_
     UNPROTECT(2);
     error("Password callback did not return a string value");
   }
+
+  if(!Rf_isString(res) || !Rf_length(res))
+    Rf_error("Failed to prompt for GPG passphrase");
 
 #ifdef HAVE_GPGME_IO_READWRITE
   gpgme_io_write(fd, CHAR(STRING_ELT(res, 0)), LENGTH(STRING_ELT(res, 0)));

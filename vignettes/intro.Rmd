@@ -1,5 +1,5 @@
 ---
-title: "Using GPG in R"
+title: "Encryption and Digital Signatures in R using GPG"
 author: "Jeroen Ooms"
 output:
   html_document:
@@ -11,7 +11,7 @@ output:
       smooth_scroll: false
     toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{Using GPG in R}
+  %\VignetteIndexEntry{Encryption and Digital Signatures in R using GPG}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -73,7 +73,7 @@ gpg_list_keys()
 
 Use `gpg_keygen()` to generate a new public private keypair:
 
-```{r}
+```{r, warning=FALSE}
 (mykey <- gpg_keygen(name = "Jerry", email = "jerry@gmail.com"))
 gpg_list_keys()[c("id", "name", "email")]
 ```
@@ -144,10 +144,18 @@ Let's use the private key we generated earlier to sign a file:
 
 ```{r, message=FALSE}
 myfile <- tempfile()
-writeLines("This is a secret message", con = myfile)
-sig <- gpg_sign(myfile, mykey)
+writeLines("This is a signed message", con = myfile)
+sig <- gpg_sign(myfile)
+writeLines(sig, "sig.gpg")
 cat(sig)
-writeLines(sig, "myfile.sig")
+```
+
+You can also create a signed message which includes the data itself by setting `mode` to `normal` or `clear`, which is useful for email:
+
+```{r}
+clearsig <- gpg_sign(myfile, mode = "clear")
+writeLines(clearsig, "clearsig.gpg")
+cat(clearsig)
 ```
 
 ### Verify a signature
@@ -155,26 +163,39 @@ writeLines(sig, "myfile.sig")
 The `gpg_verify` function will see if a signature is valid for any of the keys in the keyring:
 
 ```{r}
-gpg_verify(myfile, signature = "myfile.sig")
-unlink("myfile.sig")
+gpg_verify("sig.gpg", data = myfile)
 ```
+
+If the signature is in `clear` or `normal` mode, the signature file contains both the message and signature: 
+
+```{r}
+gpg_verify("clearsig.gpg")
+```
+
+
+```{r echo=FALSE}
+unlink(c("sig.gpg", "clearsig.gpg"))
+```
+
+### Debian example
 
 Let's verify a Debian file. The [Debian page on CRAN](https://cran.r-project.org/bin/linux/debian/) says the following:
 
-> The Debian backports archives on CRAN are signed with the key of Johannes Ranke (CRAN Debian archive) <jranke@uni-bremen.de> with key fingerprint 6212 B7B7 931C 4BB1 6280  BA13 06F9 0DE5 381B A480
+
+*The Debian backports archives on CRAN are signed with the key of Johannes Ranke (CRAN Debian archive) <jranke@uni-bremen.de> with key fingerprint __6212 B7B7 931C 4BB1 6280  BA13 06F9 0DE5 381B A480__*
 
 Let's import his key so that we can verify the [Release](https://cran.r-project.org/bin/linux/debian/jessie-cran3/Release) file, which contains checksums for all files in the repository:
 
-```{r}
+```{r, message=FALSE}
 # take out the spaces
-johannes <- gsub(" ", "", "6212 B7B7 931C 4BB1 6280  BA13 06F9 0DE5 381B A480")
+johannes <- "6212B7B7931C4BB16280BA1306F90DE5381BA480"
 gpg_recv(johannes)
 
 # Verify the file
 library(curl)
 curl_download('https://cran.r-project.org/bin/linux/debian/jessie-cran3/Release', 'Release')
 curl_download('https://cran.r-project.org/bin/linux/debian/jessie-cran3/Release.gpg', 'Release.gpg')
-gpg_verify('Release', 'Release.gpg')
+gpg_verify('Release.gpg', 'Release')
 ```
 
 Looking good! We can trust the checksums in the `Release` file to be legitimate.
@@ -192,7 +213,7 @@ GPG uses public key encryption. You can use someone's public key to encrypt a me
 
 For example we want to send an email [Glenn Greenwald](https://theintercept.com/staff/glenn-greenwald/) containing top secret information that may not be snooped by our ISP or government. His homepage at the intercept shows his GPG key in long form.
 
-```{r}
+```{r message=FALSE}
 glenn <- '734A3680A438DD45AF6F5B99A4A928C769CD6E44'
 gpg_recv(glenn)
 writeLines("TTIP is super evil!", "secret.txt")

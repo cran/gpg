@@ -27,7 +27,7 @@ gpg_restart <- function(home = NULL, path = NULL, debug = "none", silent = FALSE
     stopifnot(isTRUE(file.info(home)$isdir))
   }
   debug <- normalizePath(as.character(debug), mustWork = FALSE)
-  engine <- .Call(R_gpg_restart, home, path, readline, debug)
+  engine <- .Call(R_gpg_restart, home, path, pinentry, debug)
   gpg_version(silent = silent)
 }
 
@@ -45,16 +45,6 @@ find_wininst <- function(){
 
 is_windows <- function(){
   identical(.Platform$OS.type, "windows")
-}
-
-pinentry_warning <- function(){
-  if(gpg_info()$version >= 2 && !is_windows()){
-    try({
-      if(system2("tty", stdout = NULL) > 0){
-        message("Note that in GPG2, passphrases can only be entered if R runs in a terminal session")
-      }
-    }, silent = TRUE)
-  }
 }
 
 #' @export

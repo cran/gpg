@@ -7,6 +7,8 @@
 #' @useDynLib gpg R_gpg_import
 #' @param file path to the key file or raw vector with key data
 #' @export
+#' @family gpg
+#' @name gpg_keys
 #' @rdname gpg_keys
 gpg_import <- function(file){
   if(is.character(file)){
@@ -19,26 +21,35 @@ gpg_import <- function(file){
 
 #' @export
 #' @rdname gpg_keys
-#' @param keyserver address of http keyserver
-#' @param id unique ID of the pubkey (starts with `0x`)
-gpg_recv <- function(id, keyserver = "https://keyserver.ubuntu.com"){
+#' @param keyserver address of http keyserver. Default searches several common
+#' servers (MIT, Ubuntu, GnuPG)
+#' @param id unique ID of the pubkey to import (starts with `0x`). Alternatively you
+#' can specify a `search` string.
+#' @param search string with name or email address to match the key info.
+gpg_recv <- function(id, search = NULL, keyserver = NULL){
+  if(is.null(keyserver))
+    keyserver <- c("https://pgp.mit.edu", "https://keyserver.ubuntu.com", "http://keys.gnupg.net")
   keyserver <- sub("hkp://", "http://", keyserver, fixed = TRUE)
   keyserver <- sub("/$", "", keyserver)
-  if(!identical(substring(id, 1, 2), "0x")){
-    id <- paste0("0x", id);
+  search <- if(!length(search) && length(id)){
+    id <- paste0("0x", sub("^0x", "", id));
+    if(!grepl("^0x[0-9a-fA-F]+$", id))
+      stop("ID is not valid hexadecimal string. Use 'search' to find keys by name.", call. = FALSE)
+    id
+  } else {
+    gsub(' ', '+', search)
   }
-  tmp <- tempfile()
-  req <- curl::curl_fetch_memory(paste0(keyserver, '/pks/lookup?op=get&search=', id))
-  if(req$status > 200)
-    stop("Failed to receive key! HTTP", req$status)
-  gpg_import(req$content)
+  data <- download_key(search, keyserver)
+  gpg_import(data)
 }
 
 #' @useDynLib gpg R_gpg_delete
 #' @export
 #' @rdname gpg_keys
-gpg_delete <- function(id, secret = TRUE){
-  .Call(R_gpg_delete, id, secret)
+gpg_delete <- function(id, secret = FALSE){
+  vapply(id, function(x){
+    .Call(R_gpg_delete, x, secret)
+  }, character(1), USE.NAMES = FALSE)
 }
 
 #' @export
@@ -51,8 +62,8 @@ gpg_export <- function(id, secret = FALSE){
 #' @export
 #' @rdname gpg_keys
 #' @param secret set to `TRUE` to list/export/delete private (secret) keys
-gpg_list_keys <- function(secret = FALSE){
-  gpg_keylist_internal(secret_only = secret, local = TRUE)
+gpg_list_keys <- function(search = "", secret = FALSE){
+  gpg_keylist_internal(name = search, secret_only = secret, local = TRUE)
 }
 
 #' @useDynLib gpg R_gpg_keylist
@@ -65,3 +76,15 @@ gpg_keylist_internal <- function(name = "", secret_only = FALSE, local = FALSE){
   out$expires <- structure(out$expires, class=c("POSIXct", "POSIXt"))
   data.frame(out, stringsAsFactors = FALSE)
 }
+
+download_key <- function(id, servers){
+  for(keyserver in servers){
+    message("Searching: ", keyserver)
+    try({
+      req <- curl::curl_fetch_memory(paste0(keyserver, '/pks/lookup?op=get&search=', id))
+      if(req$status == 200) return(req$content)
+    })
+  }
+  stop("Failed to find/download public key: ", id, call. = FALSE)
+}
+
