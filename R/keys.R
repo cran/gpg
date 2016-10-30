@@ -12,11 +12,17 @@
 #' @rdname gpg_keys
 gpg_import <- function(file){
   if(is.character(file)){
+    if(grepl("https?://", file)){
+      tmp <- tempfile()
+      on.exit(unlink(tmp))
+      curl::curl_download(file, tmp)
+      file <- tmp
+    }
     stopifnot(file.exists(file))
     file <- readBin(file, raw(), file.info(file)$size)
   }
   out <- .Call(R_gpg_import, file)
-  stats::setNames(out, c("considered", "imported", "unchanged"))
+  stats::setNames(out, c("found", "imported", "secrets", "signatures", "revoked"))
 }
 
 #' @export
@@ -28,7 +34,8 @@ gpg_import <- function(file){
 #' @param search string with name or email address to match the key info.
 gpg_recv <- function(id, search = NULL, keyserver = NULL){
   if(is.null(keyserver))
-    keyserver <- c("https://pgp.mit.edu", "https://keyserver.ubuntu.com", "http://keys.gnupg.net")
+    keyserver <- c("https://pgp.mit.edu", "https://keyserver.ubuntu.com",
+                   "http://keys.gnupg.net", "http://pgp.surfnet.nl")
   keyserver <- sub("hkp://", "http://", keyserver, fixed = TRUE)
   keyserver <- sub("/$", "", keyserver)
   search <- if(!length(search) && length(id)){
@@ -64,6 +71,13 @@ gpg_export <- function(id, secret = FALSE){
 #' @param secret set to `TRUE` to list/export/delete private (secret) keys
 gpg_list_keys <- function(search = "", secret = FALSE){
   gpg_keylist_internal(name = search, secret_only = secret, local = TRUE)
+}
+
+#' @export
+#' @rdname gpg_keys
+#' @useDynLib gpg R_gpg_keysig
+gpg_list_signatures <- function(id){
+  .Call(R_gpg_keysig, id)
 }
 
 #' @useDynLib gpg R_gpg_keylist

@@ -1,5 +1,5 @@
 ---
-title: "Encryption and Digital Signatures in R using GPG"
+title: "Encryption and Digital Signatures using GPG"
 author: "Jeroen Ooms"
 output:
   html_document:
@@ -19,7 +19,11 @@ vignette: >
 ```{r, echo = FALSE, message = FALSE}
 knitr::opts_chunk$set(comment = "")
 library(gpg)
-options(width = 120)
+options(width = 120, max.print = 100)
+
+gpg_list_keys <- function(...){
+  gpg::gpg_list_keys(...)[c("id", "name", "email")]
+}
 ```
 
 
@@ -27,28 +31,36 @@ options(width = 120)
 
 ## GPG basics
 
-The *GNU Privacy Guard*, also known as *GnuPG* or simply *GPG*, is a popular open source implementation of the OpenPGP protocol ([RFC4880](https://tools.ietf.org/html/rfc4880)). The system is widely adopted for securing integrity and confidentiality of internet communications through the use of various cryptographic methods. Important applications include encryption and authentication of messages (such as email or software downloads) via public key encryption and cryptographic signatures.
+The *GNU Privacy Guard*, also known as *GnuPG* or simply *GPG*, is a popular open source OpenPGP ([RFC4880](https://tools.ietf.org/html/rfc4880)) implementation. The system is widely trusted for securing integrity and confidentiality of internet communications through various cryptographic methods. GPG is used in [Debian](https://wiki.debian.org/SecureApt) and [Redhat](https://access.redhat.com/security/team/key) to verify downloads from package managers (apt, yum) and people like Edward Snowden and [Glenn Greenwald](https://theintercept.com/staff/glenn-greenwald/) use it to encrypt confidential emails.
 
-Like most modern crypto systems, GPG makes use of public key methods. The private key is known only by its owner and is used to create signatures or decrypt a message. The corresponding public key is made freely available and so that it can be used by anyone to verify signatures, or encrypt messages which can only be encrypted by the keypair owner. 
+### Public key crypto
 
-### Compare to HTTPS
+Like most modern crypto systems, GPG makes use of public key methods. You can easily generate a personal keypair which consists of a private key and corresponding public key. 
 
-The major difference between GPG and PKI systems (such as HTTPS) is how we exchange and authenticate public keys. HTTPS is based on a system with Certificate Authorities (CA). Anyone can create a keypair for any domain/personal name, however we only trust public keys which have been signed by an official CA. 
+![pubkey](https://jeroenooms.github.io/figures/pubkey-crypto/publickey-comic-m.png)
 
-This CA is typically a commercial vendor which verifies your identity (e.g. via a copy of your passport) and then uses their own keypair to sign a certificate containing your name and public key. The public keys of CA's are hardcoded in HTTP clients. The main disadvantage is that CA's are expensive and everything collapses if any of them is compromised or not doing their job well.
+Your **private key** is to be kept secret and needed to **sign** or **decrypt** messages. The corresponding **public key** should be made available to anyone that needs to **verify** your signature, or **encrypt** messages which can only be decrypted by you.
 
-### The web of trust
+Once we have someones public key, we can send them secure messages and verify their signatures. However how do we find and authenticate the public key of a person or server if we have talked to them before?
 
-GPG uses a different system which does not rely on authorities. In GPG, peers sign each other's keys, and it is up to the user to manage who they choose to trust in their personal keyring. For any given signature, GPG will check if it was created by a trusted party in the keyring, or by a third party which has been verified by someone in the keyring, and so on: a "web of trust".
+### Web of trust
 
-The easiest way to exchange (signed or unsigned) public keys is via a keyserver. GPG is compatible with existing PGP key servers. These servers mirror each other so most keys are available on either one.
+The complexity in public key systems derives from authenticating public keys. If we can not trust our communication channel to be safe, we can only be sure that a public key belongs to given person is it has been signed by someone that we do trust.
+
+The major difference between GPG and PKI systems (such as HTTPS) is how we authenticate public keys. HTTPS is based on a system with Certificate Authorities (CA). Anyone can create a keypair for any domain/personal name, however we only trust public keys which have been signed by an official CA. This CA is typically a commercial vendor which verifies your identity (e.g. via a copy of your passport) and then uses their own keypair to sign a certificate containing your public key and your personal name / email / domain.
+
+![trust](https://jeroenooms.github.io/figures/pubkey-crypto/trust-m.png)
+
+GPG uses a different system which does not distinguish between peers and authorities. In GPG, anyone can sign another persons key. The GPG user determines which peers they choose to trust in their personal keyring. For new peers, the GPG software helps you figure out which of your current peers has verified the identity of the new peer, perhaps indirectly via a third or fourth peer, and so on: a "web of trust".
+
+The easiest way to exchange public keys and key signatures is via a keyserver. GPG is compatible with existing PGP key servers. These servers mirror each other so most keys are available on either one. This package automatically retrieves keys and signatures via the `gpg_recv` function. 
 
  - https://pgp.mit.edu
  - https://keyserver.ubuntu.com
+ 
+GPG keyservers do not need HTTPS. One should only trust GPG keys on basis of GPG signatures, regardless of how they were obtained. For this reason it is also valid to share GPG public keys via e.g. a website or email.
 
-GPG key servers might not use HTTPS. In GPG we only trust keys only on basis of who has signed them, regardless of how they were obtained. For this reason it is also perfectly valid to share GPG public keys via e.g. a website or email.
-
-## Managing your keyring
+## Your keyring
 
 It is important to know which version of GPG you are running and where your home dir is. Your home directory contains your configuration and the keyrings. GPG defaults to your system keyring, which is the same as the `gpg` command line utility and system package manager use.
 
@@ -75,36 +87,42 @@ Use `gpg_keygen()` to generate a new public private keypair:
 
 ```{r, warning=FALSE}
 (mykey <- gpg_keygen(name = "Jerry", email = "jerry@gmail.com"))
-gpg_list_keys()[c("id", "name", "email")]
+gpg_list_keys()
 ```
 
-
-### Import from disk
-
-The `gpg_import` function reads an armored GPG key from disk:
-
-```{r}
-curl::curl_download("https://stallman.org/rms-pubkey.txt", "rms-pubkey.txt")
-gpg_import("rms-pubkey.txt")
-unlink("rms-pubkey.txt")
-```
 
 ### Import from keyserver
 
-Use the `gpg_recv` function to download a given key ID from the keyserver. For example let's import the public key from Michael Rutter which is used to [sign the Ubuntu r-base packages](https://cran.r-project.org/bin/linux/ubuntu/README.html) from CRAN:
+Use the `gpg_recv` function to download a given key and all available signatures for this key from a keyserver. For example let's import the public key from Michael Rutter which is used to [sign the Ubuntu r-base packages](https://cran.r-project.org/bin/linux/ubuntu/README.html) from CRAN:
 
 ```{r}
 gpg_recv(id ="E084DAB9")
-keyring <- gpg_list_keys()
-keyring[c("id", "name", "email")]
+(keyring <- gpg_list_keys())
 ```
 
 Note that for imported keys, we do not have the private key:
 
 ```{r}
-secring <- gpg_list_keys(secret = TRUE)
-secring[c("id", "name", "email")]
+(secring <- gpg_list_keys(secret = TRUE))
 ```
+
+### Import from file
+
+The `gpg_import` function reads an armored GPG key from a file or URL:
+
+```{r}
+gpg_import("https://stallman.org/rms-pubkey.txt")
+```
+
+However this file does not contain any signatures for this key. If we import it from a keyserver we also get the signatures:
+
+```{r}
+(rms_id <- gpg_list_keys("rms")$id)
+gpg_recv(rms_id)
+gpg_list_signatures(rms_id)
+```
+
+The signature only contains the key ID of the signer. You would need to download the corresponding pubkeys to actually verify these signatures.
 
 ### Export a key
 
@@ -128,7 +146,7 @@ Delete a key from its ID or fingerprint. Let's delete the RMS key:
 
 ```{r}
 gpg_delete('2C6464AF2A8E4C02')
-gpg_list_keys()[c("id", "name", "email")]
+gpg_list_keys()
 ```
 
 
@@ -190,7 +208,17 @@ Let's import his key so that we can verify the [Release](https://cran.r-project.
 # take out the spaces
 johannes <- "6212B7B7931C4BB16280BA1306F90DE5381BA480"
 gpg_recv(johannes)
+```
 
+If you don't trust the CRAN homepage, you could check who has signed this key. You'd need to import the corresponding peer keys for more information.
+
+```{r}
+gpg_list_signatures(johannes)
+```
+
+Now lets verify the release files:
+
+```{r}
 # Verify the file
 library(curl)
 curl_download('https://cran.r-project.org/bin/linux/debian/jessie-cran3/Release', 'Release')

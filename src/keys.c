@@ -28,11 +28,16 @@ SEXP R_gpg_keygen_new(SEXP userid){
 #endif
 }
 
-
 SEXP R_gpg_delete(SEXP id, SEXP secret){
   gpgme_key_t key;
-  bail(gpgme_get_key(ctx, CHAR(STRING_ELT(id, 0)), &key, 0), "get new key");
-  bail(gpgme_op_delete(ctx, key, asLogical(secret)), "delete key");
+  const char * idstr = CHAR(STRING_ELT(id, 0));
+  bail(gpgme_get_key(ctx, idstr, &key, 0), "find key");
+  gpgme_error_t err = gpgme_op_delete(ctx, key, asLogical(secret));
+  if(gpg_err_code (err) == GPG_ERR_CONFLICT){
+    Rf_warningcall(R_NilValue, "Did not delete %s. Set secret = TRUE to delete private keys", idstr);
+    return mkString("");
+  }
+  bail(err, "delete key");
   return mkString(key->subkeys->keyid);
 }
 
@@ -41,10 +46,12 @@ SEXP R_gpg_import(SEXP pubkey) {
   bail(gpgme_data_new_from_mem(&KEY, (const char*) RAW(pubkey), LENGTH(pubkey), 0), "creating key buffer");
   bail(gpgme_op_import(ctx, KEY), "importing pubkey");
   gpgme_import_result_t result = gpgme_op_import_result(ctx);
-  SEXP out = PROTECT(allocVector(INTSXP, 3));
+  SEXP out = PROTECT(allocVector(INTSXP, 5));
   INTEGER(out)[0] = result->considered;
   INTEGER(out)[1] = result->imported;
-  INTEGER(out)[2] = result->unchanged;
+  INTEGER(out)[2] = result->secret_imported;
+  INTEGER(out)[3] = result->new_signatures;
+  INTEGER(out)[4] = result->new_revocations;
   UNPROTECT(1);
   return out;
 }

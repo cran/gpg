@@ -1,7 +1,11 @@
 ## ---- echo = FALSE, message = FALSE-----------------------------------------------------------------------------------
 knitr::opts_chunk$set(comment = "")
 library(gpg)
-options(width = 120)
+options(width = 120, max.print = 100)
+
+gpg_list_keys <- function(...){
+  gpg::gpg_list_keys(...)[c("id", "name", "email")]
+}
 
 ## ---------------------------------------------------------------------------------------------------------------------
 str(gpg_info())
@@ -14,21 +18,22 @@ gpg_list_keys()
 
 ## ---- warning=FALSE---------------------------------------------------------------------------------------------------
 (mykey <- gpg_keygen(name = "Jerry", email = "jerry@gmail.com"))
-gpg_list_keys()[c("id", "name", "email")]
-
-## ---------------------------------------------------------------------------------------------------------------------
-curl::curl_download("https://stallman.org/rms-pubkey.txt", "rms-pubkey.txt")
-gpg_import("rms-pubkey.txt")
-unlink("rms-pubkey.txt")
+gpg_list_keys()
 
 ## ---------------------------------------------------------------------------------------------------------------------
 gpg_recv(id ="E084DAB9")
-keyring <- gpg_list_keys()
-keyring[c("id", "name", "email")]
+(keyring <- gpg_list_keys())
 
 ## ---------------------------------------------------------------------------------------------------------------------
-secring <- gpg_list_keys(secret = TRUE)
-secring[c("id", "name", "email")]
+(secring <- gpg_list_keys(secret = TRUE))
+
+## ---------------------------------------------------------------------------------------------------------------------
+gpg_import("https://stallman.org/rms-pubkey.txt")
+
+## ---------------------------------------------------------------------------------------------------------------------
+(rms_id <- gpg_list_keys("rms")$id)
+gpg_recv(rms_id)
+gpg_list_signatures(rms_id)
 
 ## ---------------------------------------------------------------------------------------------------------------------
 str <- gpg_export(id = mykey)
@@ -40,7 +45,7 @@ cat(str)
 
 ## ---------------------------------------------------------------------------------------------------------------------
 gpg_delete('2C6464AF2A8E4C02')
-gpg_list_keys()[c("id", "name", "email")]
+gpg_list_keys()
 
 ## ---- message=FALSE---------------------------------------------------------------------------------------------------
 myfile <- tempfile()
@@ -68,6 +73,10 @@ unlink(c("sig.gpg", "clearsig.gpg"))
 johannes <- "6212B7B7931C4BB16280BA1306F90DE5381BA480"
 gpg_recv(johannes)
 
+## ---------------------------------------------------------------------------------------------------------------------
+gpg_list_signatures(johannes)
+
+## ---------------------------------------------------------------------------------------------------------------------
 # Verify the file
 library(curl)
 curl_download('https://cran.r-project.org/bin/linux/debian/jessie-cran3/Release', 'Release')
