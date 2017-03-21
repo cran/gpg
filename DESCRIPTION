@@ -1,8 +1,8 @@
 Package: gpg
 Type: Package
 Title: GNU Privacy Guard for R
-Version: 0.4
-Authors@R: person("Jeroen", "Ooms", email = "jeroen.ooms@stat.ucla.edu", role = c("aut", "cre"))
+Version: 0.5
+Authors@R: person("Jeroen", "Ooms", email = "jeroen@berkeley.edu", role = c("aut", "cre"))
 Description: Bindings to GnuPG for working with OpenGPG (RFC4880) cryptographic methods.
     Includes utilities for public key encryption, creating and verifying digital signatures,
     and managing your local keyring. Note that some functionality depends on the version of 
@@ -12,13 +12,15 @@ License: MIT + file LICENSE
 SystemRequirements: GPGME: libgpgme11-dev (deb), gpgme-devel (rpm)
         gpgme (brew). On Linux 'haveged' is recommended for generating
         entropy when using the GPG key generator.
-RoxygenNote: 5.0.1.9000
+RoxygenNote: 6.0.1
 Imports: curl
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
+URL: https://github.com/jeroen/gpg
+BugReports: https://github.com/jeroen/gpg/issues
 NeedsCompilation: yes
-Packaged: 2016-10-30 10:59:28 UTC; jeroen
+Packaged: 2017-03-21 15:53:52 UTC; jeroen
 Author: Jeroen Ooms [aut, cre]
-Maintainer: Jeroen Ooms <jeroen.ooms@stat.ucla.edu>
+Maintainer: Jeroen Ooms <jeroen@berkeley.edu>
 Repository: CRAN
-Date/Publication: 2016-10-30 16:58:06
+Date/Publication: 2017-03-21 16:40:31 UTC
