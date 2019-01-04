@@ -54,12 +54,13 @@ gpgme_error_t pwprompt(void *hook, const char *uid_hint, const char *passphrase_
 
 SEXP R_engine_info(){
   gpgme_engine_info_t info = gpgme_ctx_get_engine_info (ctx);
-  return Rf_list4(
-    make_string(info->file_name),
-    make_string(info->version),
-    make_string(info->home_dir),
-    make_string(gpgme_check_version (NULL))
-  );
+  SEXP out = PROTECT(Rf_allocVector(VECSXP, 4));
+  SET_VECTOR_ELT(out, 0, make_string(info->file_name));
+  SET_VECTOR_ELT(out, 1, make_string(info->version));
+  SET_VECTOR_ELT(out, 2, make_string(info->home_dir));
+  SET_VECTOR_ELT(out, 3, make_string(gpgme_check_version (NULL)));
+  UNPROTECT(1);
+  return out;
 }
 
 SEXP R_gpg_restart(SEXP home, SEXP path, SEXP pwfun, SEXP debug) {
@@ -93,11 +94,14 @@ SEXP R_gpg_restart(SEXP home, SEXP path, SEXP pwfun, SEXP debug) {
   bail(gpgme_new(&ctx), "context creation");
   gpgme_set_armor(ctx, 1);
 
-  // Required for GPG 2.1
+
+  /* Doesn't seem to work anymore
 #if GPGME_VERSION_NUMBER >= 0x010700
+  // Required for GPG 2.1
   bail(gpgme_set_pinentry_mode(ctx, GPGME_PINENTRY_MODE_LOOPBACK), "set pinentry to loopback");
 #endif
   gpgme_set_passphrase_cb(ctx, pwprompt, pwfun);
+  */
 
   // Get engine info
   return R_engine_info();
