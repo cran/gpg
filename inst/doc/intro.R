@@ -88,10 +88,10 @@ unlink('Release')
 unlink('Release.gpg')
 
 ## ----message=FALSE----------------------------------------------------------------------------------------------------
-glenn <- '734A3680A438DD45AF6F5B99A4A928C769CD6E44'
-gpg_recv(glenn)
-writeLines("TTIP is super evil!", "secret.txt")
-msg <- gpg_encrypt("secret.txt", receiver = glenn)
+jeroen <- '16C019F96112961CEB4F38B76094FC5BDA955A42'
+gpg_recv(jeroen)
+writeLines("Pizza delivery is on it's way!", "secret.txt")
+msg <- gpg_encrypt("secret.txt", receiver = jeroen)
 writeLines(msg, "msg.gpg")
 unlink("secret.txt")
 cat(msg)
@@ -110,7 +110,7 @@ cat(msg)
 gpg_decrypt("msg.gpg")
 
 ## ---------------------------------------------------------------------------------------------------------------------
-msg <- gpg_encrypt("secret.txt", receiver = glenn, signer = mykey)
+msg <- gpg_encrypt("secret.txt", receiver = jeroen, signer = mykey)
 writeLines(msg, "msg.gpg")
 cat(msg)
 
