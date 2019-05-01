@@ -70,7 +70,7 @@ unlink(c("sig.gpg", "clearsig.gpg"))
 
 ## ---- message=FALSE---------------------------------------------------------------------------------------------------
 # take out the spaces
-johannes <- "6212B7B7931C4BB16280BA1306F90DE5381BA480"
+johannes <- "E19F5F87128899B192B1A2C2AD5F960A256A04AF"
 gpg_recv(johannes)
 
 ## ---------------------------------------------------------------------------------------------------------------------
@@ -79,8 +79,8 @@ gpg_list_signatures(johannes)
 ## ---------------------------------------------------------------------------------------------------------------------
 # Verify the file
 library(curl)
-curl_download('https://cran.r-project.org/bin/linux/debian/jessie-cran3/Release', 'Release')
-curl_download('https://cran.r-project.org/bin/linux/debian/jessie-cran3/Release.gpg', 'Release.gpg')
+curl_download('https://cran.r-project.org/bin/linux/debian/buster-cran35/Release', 'Release')
+curl_download('https://cran.r-project.org/bin/linux/debian/buster-cran35/Release.gpg','Release.gpg')
 gpg_verify('Release.gpg', 'Release')
 
 ## ---- echo = FALSE----------------------------------------------------------------------------------------------------
