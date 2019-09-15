@@ -70,8 +70,8 @@ gpg_info <- function(){
                       names = c("gpg", "version", "home", "gpgme"))
   if(is.na(engine$home))
     engine$home <- dirs$home
-  engine$version <- as.numeric_version(engine$version)
-  engine$gpgme <- as.numeric_version(engine$gpgme)
+  engine$version <- parse_version(engine$version)
+  engine$gpgme <- parse_version(engine$gpgme)
   c(list(gpgconf = dirs$gpgconf), engine)
 }
 
@@ -89,3 +89,8 @@ mytrimws <- function(x){
   mysub("[ \t\r\n]+$", mysub("^[ \t\r\n]+", x))
 }
 
+# Workaround for debian "1.13.1-unknown"
+parse_version <- function(x){
+  x <- sub("(.*)-.*", "\\1", x)
+  as.numeric_version(x)
+}
