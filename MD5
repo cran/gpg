@@ -1,7 +1,7 @@
-be9456abb18ce06a560cdfe22c2923ca *DESCRIPTION
-aa5f0440ff294a9774880d777a2ed702 *LICENSE
+1e6190b93d2322ac1c9c8c1993e7671d *DESCRIPTION
+3a9a8e02a6b712446ddd52cb2cb80226 *LICENSE
 5b9f2a9951eb28bbc3d75d2678553d3b *NAMESPACE
-d14b826c6559afff65e3bc144cb77ab3 *NEWS
+be1eac57aaec1b9f74cf1a1068c76400 *NEWS
 5d83d2aba55b95c41439e0d31a9f5b1c *R/encrypt.R
 3a5512c3314d32046d8cdb2e4c89306e *R/keygen.R
 f3310ba561c93f97d6d7d11325e2bff4 *R/keys.R
@@ -11,11 +11,11 @@ f3310ba561c93f97d6d7d11325e2bff4 *R/keys.R
 ed780ec4c410643955ceac5fe81d87ac *R/signing.R
 9ae259513860c44d49e4630e5603458c *build/vignette.rds
 6071edd604dbeb75308cfbedc7790398 *cleanup
-9cb3cc800a9a79c6440c2356f4d1d2b7 *configure
+5d71527ccd491c8511f320922de65a16 *configure
 d41d8cd98f00b204e9800998ecf8427e *configure.win
 4ba71eadcbd1ff12b06c478ce98c0f44 *inst/doc/intro.R
 3323a2653df160c03db20af4911ac7e0 *inst/doc/intro.Rmd
-d9797fe58f60801b062969db52482baf *inst/doc/intro.html
+0fc20152bcdecf33bcf1d34c45f46d0d *inst/doc/intro.html
 2dd93f9fcf6bfed27df5656124a5365c *man/gpg_encrypt.Rd
 172a555ba5ed926995d81fc444d274b3 *man/gpg_info.Rd
 35186551753c055289143b1f76f74340 *man/gpg_keygen.Rd
@@ -24,9 +24,9 @@ a19ac0f7a5914d9fc8bb20256618d553 *man/gpg_sign.Rd
 d2397502fd03e450dbf56e0f98d2862e *man/pinentry.Rd
 111e1efb50ff675feb507ea42a24b300 *src/Makevars.in
 973754189149a6ba7a41c8de4b3dab48 *src/Makevars.win
-24e276085285376711c8aac24e87e43f *src/common.h
+6b58e8b4b825c6f04447e1768116a724 *src/common.h
 0cbd720840e98b84fa914d8a930c0b2f *src/encrypt.c
-11674dca0e47b3856b326ef04b1f35a7 *src/engine.c
+0fda30a5019a2948555be7d14ca7165c *src/engine.c
 33138cf14816f3553248016a124fc827 *src/keys.c
 4cc3f354b49440a9cf1eef6327652186 *src/keysig.c
 07ad072ff50196b4f051f71a9e807a8e *src/options.c

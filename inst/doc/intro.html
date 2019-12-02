@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -1405,6 +1404,7 @@ summary {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -1433,6 +1433,12 @@ summary {
 }
 }
 
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
 
 .toc-content {
   padding-left: 30px;
@@ -1546,15 +1552,15 @@ div.tocify {
 <pre class="r"><code>str(gpg_info())</code></pre>
 <pre><code>List of 5
  $ gpgconf: chr &quot;/usr/local/bin/gpgconf&quot;
- $ gpg    : chr &quot;/usr/local/Cellar/gnupg/2.2.17/bin/gpg&quot;
+ $ gpg    : chr &quot;/usr/local/Cellar/gnupg/2.2.18/bin/gpg&quot;
  $ version:Class &#39;numeric_version&#39;  hidden list of 1
-  ..$ : int [1:3] 2 2 17
+  ..$ : int [1:3] 2 2 18
  $ home   : chr &quot;/Users/jeroen/.gnupg&quot;
  $ gpgme  :Class &#39;numeric_version&#39;  hidden list of 1
   ..$ : int [1:3] 1 13 1</code></pre>
 <p>Use <code>gpg_restart</code> to switch to another home directory, e.g. for a client which uses its own configuration and keyrings. For this example we store keys in a temporary directory.</p>
 <pre class="r"><code>gpg_restart(home = tempdir())</code></pre>
-<pre><code>gpg (GnuPG) 2.2.17
+<pre><code>gpg (GnuPG) 2.2.18
 libgcrypt 1.8.5
 Copyright (C) 2019 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later &lt;https://gnu.org/licenses/gpl.html&gt;
@@ -1576,10 +1582,10 @@ Compression: Uncompressed, ZIP, ZLIB, BZIP2</code></pre>
 <h3>Generate keys</h3>
 <p>Use <code>gpg_keygen()</code> to generate a new public private keypair:</p>
 <pre class="r"><code>(mykey &lt;- gpg_keygen(name = &quot;Jerry&quot;, email = &quot;jerry@gmail.com&quot;))</code></pre>
-<pre><code>[1] &quot;BC79DBE3ED0C2B22&quot;</code></pre>
+<pre><code>[1] &quot;2FB74090ADEE0820&quot;</code></pre>
 <pre class="r"><code>gpg_list_keys()</code></pre>
 <pre><code>                id  name           email
-1 BC79DBE3ED0C2B22 Jerry jerry@gmail.com</code></pre>
+1 2FB74090ADEE0820 Jerry jerry@gmail.com</code></pre>
 </div>
 <div id="import-from-keyserver" class="section level3">
 <h3>Import from keyserver</h3>
@@ -1590,12 +1596,12 @@ Compression: Uncompressed, ZIP, ZLIB, BZIP2</code></pre>
          1          1          0          0          0 </code></pre>
 <pre class="r"><code>(keyring &lt;- gpg_list_keys())</code></pre>
 <pre><code>                id           name              email
-1 BC79DBE3ED0C2B22          Jerry    jerry@gmail.com
+1 2FB74090ADEE0820          Jerry    jerry@gmail.com
 2 51716619E084DAB9 Michael Rutter marutter@gmail.com</code></pre>
 <p>Note that for imported keys, we do not have the private key:</p>
 <pre class="r"><code>(secring &lt;- gpg_list_keys(secret = TRUE))</code></pre>
 <pre><code>                id  name           email
-1 BC79DBE3ED0C2B22 Jerry jerry@gmail.com</code></pre>
+1 2FB74090ADEE0820 Jerry jerry@gmail.com</code></pre>
 </div>
 <div id="import-from-file" class="section level3">
 <h3>Import from file</h3>
@@ -1609,29 +1615,29 @@ Compression: Uncompressed, ZIP, ZLIB, BZIP2</code></pre>
 <pre class="r"><code>gpg_recv(rms_id)</code></pre>
 <pre><code>Searching: https://keyserver.ubuntu.com</code></pre>
 <pre><code>     found   imported    secrets signatures    revoked 
-         1          0          0        194          0 </code></pre>
+         1          0          0        196          0 </code></pre>
 <pre class="r"><code>gpg_list_signatures(rms_id)</code></pre>
 <pre><code>                 id           timestamp             name       email success
-1  2C6464AF2A8E4C02 2013-07-20 09:32:38 Richard Stallman rms@gnu.org    TRUE
-2  624DC565135EA668 2013-07-20 09:37:45                                FALSE
-3  F05DDAE40371FCE5 2013-09-15 14:18:46                                FALSE
-4  231696C3EAE0078A 2013-09-24 14:15:58                                FALSE
-5  7B585B30807C2A87 2013-09-28 13:59:04                                FALSE
-6  7CEF29847562C516 2013-09-28 19:59:53                                FALSE
-7  520E0C8369B003EF 2013-08-20 03:31:55                                FALSE
-8  D56E1B4C135D47A1 2013-08-29 04:36:03                                FALSE
-9  31CC32CEF78F3EE4 2013-08-29 04:37:52                                FALSE
-10 9439E86389D0AF41 2013-08-29 04:55:01                                FALSE
-11 C5CFD08B22247CDF 2013-09-24 06:00:05                                FALSE
-12 20B7283AFE254C69 2013-09-28 13:44:02                                FALSE
-13 A866D7CCAE087291 2013-09-29 08:59:25                                FALSE
-14 6D33FBF5B5E4C71A 2013-09-30 06:52:36                                FALSE
-15 8916CADF8ACD372A 2013-10-02 04:17:17                                FALSE
-16 8E549D02234CC324 2013-10-03 00:36:24                                FALSE
-17 D605848ED7E69871 2013-10-04 02:03:23                                FALSE
-18 758EAEC123F62336 2013-10-12 15:53:08                                FALSE
-19 7B585B30807C2A87 2013-10-18 12:27:08                                FALSE
-20 E4A6D8A25310523C 2013-10-22 17:53:11                                FALSE
+1  2C6464AF2A8E4C02 2013-07-20 18:32:38 Richard Stallman rms@gnu.org    TRUE
+2  624DC565135EA668 2013-07-20 18:37:45                                FALSE
+3  F05DDAE40371FCE5 2013-09-15 23:18:46                                FALSE
+4  231696C3EAE0078A 2013-09-24 23:15:58                                FALSE
+5  7B585B30807C2A87 2013-09-28 22:59:04                                FALSE
+6  7CEF29847562C516 2013-09-29 04:59:53                                FALSE
+7  520E0C8369B003EF 2013-08-20 12:31:55                                FALSE
+8  D56E1B4C135D47A1 2013-08-29 13:36:03                                FALSE
+9  31CC32CEF78F3EE4 2013-08-29 13:37:52                                FALSE
+10 9439E86389D0AF41 2013-08-29 13:55:01                                FALSE
+11 C5CFD08B22247CDF 2013-09-24 15:00:05                                FALSE
+12 20B7283AFE254C69 2013-09-28 22:44:02                                FALSE
+13 A866D7CCAE087291 2013-09-29 17:59:25                                FALSE
+14 6D33FBF5B5E4C71A 2013-09-30 15:52:36                                FALSE
+15 8916CADF8ACD372A 2013-10-02 13:17:17                                FALSE
+16 8E549D02234CC324 2013-10-03 09:36:24                                FALSE
+17 D605848ED7E69871 2013-10-04 11:03:23                                FALSE
+18 758EAEC123F62336 2013-10-13 00:53:08                                FALSE
+19 7B585B30807C2A87 2013-10-18 21:27:08                                FALSE
+20 E4A6D8A25310523C 2013-10-23 02:53:11                                FALSE
  [ reached &#39;max&#39; / getOption(&quot;max.print&quot;) -- omitted 90 rows ]</code></pre>
 <p>The signature only contains the key ID of the signer. You would need to download the corresponding pubkeys to actually verify these signatures.</p>
 </div>
@@ -1642,55 +1648,55 @@ Compression: Uncompressed, ZIP, ZLIB, BZIP2</code></pre>
 cat(str)</code></pre>
 <pre><code>-----BEGIN PGP PUBLIC KEY BLOCK-----
 
-mQENBF1+c9UBCACv3GM/W2q9xgNXmvEM87226tTmGwMSwgRwjg3QfuCt0FxIImoZ
-5cH2B/P8Oy+Hxs+WQpau+Xt7a3pU0etqfo++rt88EEx2ewhJSFqf6pFTFKZi4iQW
-IoBKoHLzAhnmbXB1LiNXDMmQRpNaSTQdDOWiJHncPz0mReUckW3uKLSyURHI/TYc
-GERg6n/jtRTe6p25ZIrRUVUwPcgX4okag/nmECOvw79GBCObNyDOhSNT5D0QsxU1
-JanvUZP1o5CMWRQAFvIQk4iI2tJsuPok+lMzbjQCRqKWep0q9ytw30J0rWAKG30K
-UPZ/6voG5Lpa806CGVpwr1sg2EDtQTJX5lF/ABEBAAG0F0plcnJ5IDxqZXJyeUBn
-bWFpbC5jb20+iQFUBBMBCAA+FiEEYOex5rCVR1ofirBYvHnb4+0MKyIFAl1+c9UC
-Gw8FCQPCZwAFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AACgkQvHnb4+0MKyKA5AgA
-lDfMo2XN13iZ0P5vl0i8Py5sC/HEphFmZ9EpDe7DetyXMxMPCI1sxJOfpP+7vE+V
-V6VN19BOqEFFOXoGq6a+jnEwJ1pcwdwn3d3xaLBZo5OiCzxPezmcC99rudR+DCBo
-TipPRUkaLSBrcyxjCdhpB9VI3qb2FXLhKRKvyeOijktY0OpmXbkH6ik7ugjiVJa9
-c91NsxShT4xgJk3N2ZHRL7YKaEMT+oIYnDWDzam+4nnGctvhWuaF0Dn3RNU4C8c/
-poXBTBKHibTEGvzzl7Cd4O1Xkkuvr2UhBefopAW7I9rhhw/Tim/GBLJI3UuTuhmo
-aVQq4Wj+qNbbRpjuQkrmLA==
-=v1QX
+mQENBF3lDRcBCADfa/b3gx2CRoUymq1GgIe42LbKwzfloStjwjMEgait7HVXuCUw
+eia8cSrwhZjjrfWlJ1KGlodBu9jXHsaRBhFS7ivd0gmCdFVd4HBw8Nz83baOOGLN
+U5PYw0jU6ORZFFfM2wEMWpWI4F5fxViU5ioqfBPR6Ety4beK4noxoFKrVzBeh8nX
+ddqPk2kfGFuwaEktXotW4a2EM4NhSiQVEfuQhGdYcYsLlL27NOoTbEsA/FyKfAai
+8+s8qxqdwkogJXgQ1XD6JHRzpcaCMeVhABAHffWogKm3nKS+I1GaZInP7iFDPl7B
+xDw4rxNKufNi9vW8GMNPET929244lKm9VVCRABEBAAG0F0plcnJ5IDxqZXJyeUBn
+bWFpbC5jb20+iQFUBBMBCAA+FiEEQ7t0aKbAXBpExRIVL7dAkK3uCCAFAl3lDRcC
+Gw8FCQPCZwAFCwkIBwIGFQoJCAsCBBYCAwECHgECF4AACgkQL7dAkK3uCCCokggA
+rzZeCyI0eQT+IBVecAp6lDf05j0z4mYC2vS2b+Xmn4lzGNsD26+IlzSrIUbu0CGZ
+cf1NHQoBOEqNZGtpqOVAmGM9su7E5T9NwKjvC0OwyyAXjwrEe0ggFM/xgodf02OM
+Eur7ptOg+MzdyD6AerugglQgSHT9ssuph9zCpEAjWp4MEOdurnPBIZIXlxX4NUqx
+EevHpcJNEsvwQ7x/aW5IH8aMmfcFjRFiruC+9bJf4+A8zhwbRCT+Wgf6cx2abYeb
+GvLxxD0QfCOXerGZ7PU/ze5W5oN2KOJFFG4YvZbIoi1XP38uHSasuEJbMnWs//oy
+DFJliLtwxRY6rDLEuV9XgQ==
+=qLgL
 -----END PGP PUBLIC KEY BLOCK-----</code></pre>
 <p>If you also own the private key you can export this as well:</p>
 <pre class="r"><code>str &lt;- gpg_export(id = mykey, secret = TRUE)
 cat(str)</code></pre>
 <pre><code>-----BEGIN PGP PRIVATE KEY BLOCK-----
 
-lQOYBF1+c9UBCACv3GM/W2q9xgNXmvEM87226tTmGwMSwgRwjg3QfuCt0FxIImoZ
-5cH2B/P8Oy+Hxs+WQpau+Xt7a3pU0etqfo++rt88EEx2ewhJSFqf6pFTFKZi4iQW
-IoBKoHLzAhnmbXB1LiNXDMmQRpNaSTQdDOWiJHncPz0mReUckW3uKLSyURHI/TYc
-GERg6n/jtRTe6p25ZIrRUVUwPcgX4okag/nmECOvw79GBCObNyDOhSNT5D0QsxU1
-JanvUZP1o5CMWRQAFvIQk4iI2tJsuPok+lMzbjQCRqKWep0q9ytw30J0rWAKG30K
-UPZ/6voG5Lpa806CGVpwr1sg2EDtQTJX5lF/ABEBAAEAB/4+yjIXc4TzmCkmVNh/
-NuHEVylHtVpODr72DwpIqJyBAtWIHd2DPKEZvrIzG1C3qlkA/ep+M+6OXQwTD9Z9
-sg2R2C81a15ZqUkGnVJaKa7Umplj0flve8cRniMct+HWf7m45Q3SLWskW8aN5Hg6
-bRnqYBqwdFXZffg1UImPELKfvbHOfG0ADx+JmwJs89CDrX11/L1r3W5AIvvipHEJ
-J9o2B5vA8l3HA4hIT1LdBLAQBcH95WwDkiPcsEQCgHBe1sZfRtm2zTYqEo2tKLCp
-m1d7mE5kPWFDJ9NL0qMYz/6/ihIXcD2stJ7nK8vR+t36/msCuRBqtaz2tGnv+Rt+
-Bu8hBADPwXCidtmrHBi6H8wPChcTp/uDBUZOZZLMTye4gmREGL16bd4b2MFRd+Ab
-NlxGX/NCT2Ivn+fW1vUXBR/ZtxxASAjXrO8PQW7kGrvvVbOytxybumpEbHT/vxkM
-45PFGPvf16a5xfFBy9l5lB0LVew+U4boSagh0R2LnC49GJ4TIQQA2LLiXx2EOlS5
-7A6eoN4vkCJ8bcV6/q26XCrtX7tha3D/sQZFP+XU8tc0WY2CMjK/Jrp5RfqdFVuL
-fy3rCANgjlsyKxDzQu3uo4HorFM4+7UYpQwzJw6TtDbNTKIrDPvCSZJRWPF/PvFy
-hBENhEbpbPR7sDbhPgtizlgXgnQacJ8EAJBNKlNfUkEJ4HVLD4j5cS0uMnUcHDgx
-dAnagJz5nRE/G1ZaKvq4/4CRpfWGMRiaGhVgBvTed26YL8GiLDzU88VEs4i0n+Ka
-kSazQawU+HTGGaP2eRE9mtbLQMHWDuT8o52VAj7qQlRRHO8ovL7xVgbOZXo7v9sp
-pPkdBzAfAD8ANTe0F0plcnJ5IDxqZXJyeUBnbWFpbC5jb20+iQFUBBMBCAA+FiEE
-YOex5rCVR1ofirBYvHnb4+0MKyIFAl1+c9UCGw8FCQPCZwAFCwkIBwIGFQoJCAsC
-BBYCAwECHgECF4AACgkQvHnb4+0MKyKA5AgAlDfMo2XN13iZ0P5vl0i8Py5sC/HE
-phFmZ9EpDe7DetyXMxMPCI1sxJOfpP+7vE+VV6VN19BOqEFFOXoGq6a+jnEwJ1pc
-wdwn3d3xaLBZo5OiCzxPezmcC99rudR+DCBoTipPRUkaLSBrcyxjCdhpB9VI3qb2
-FXLhKRKvyeOijktY0OpmXbkH6ik7ugjiVJa9c91NsxShT4xgJk3N2ZHRL7YKaEMT
-+oIYnDWDzam+4nnGctvhWuaF0Dn3RNU4C8c/poXBTBKHibTEGvzzl7Cd4O1Xkkuv
-r2UhBefopAW7I9rhhw/Tim/GBLJI3UuTuhmoaVQq4Wj+qNbbRpjuQkrmLA==
-=vxs5
+lQOXBF3lDRcBCADfa/b3gx2CRoUymq1GgIe42LbKwzfloStjwjMEgait7HVXuCUw
+eia8cSrwhZjjrfWlJ1KGlodBu9jXHsaRBhFS7ivd0gmCdFVd4HBw8Nz83baOOGLN
+U5PYw0jU6ORZFFfM2wEMWpWI4F5fxViU5ioqfBPR6Ety4beK4noxoFKrVzBeh8nX
+ddqPk2kfGFuwaEktXotW4a2EM4NhSiQVEfuQhGdYcYsLlL27NOoTbEsA/FyKfAai
+8+s8qxqdwkogJXgQ1XD6JHRzpcaCMeVhABAHffWogKm3nKS+I1GaZInP7iFDPl7B
+xDw4rxNKufNi9vW8GMNPET929244lKm9VVCRABEBAAEAB/iJNI2Icup1ciJ/A35l
+39IL6VPF6EHG+iDiNOCyGqT8KkzBEfnEuT81MW72axT5T8lUR794wx0ECmp7aFit
+tx5+vQ5X9CTi5iCrTzwHRHYo0/+jxSF6P+ud+70+cOwTyHy1PzcKKE3RQR1GIP3F
+TrhxzHfNOciJjaap2tlUV3wkKZxyKONLnWJa4l7U5YRoq5tJdq6FrYa6dQQkqnAK
+AFVxZVV3i2BdERx9xcMX3cQ5sL2tHIbJJykLrwGUP88qKykUwoBcOxwnb4rq5Sqx
+uDp2mkEz4KmagcmqIvCpfoG+qnmZgWinl04C3BWY2lz3DN/Ix0/kyDXmBiTHg+Cs
+EM8EAOKdXqvfrmmCtkppZy950cP3l843VhBGqpz8MpJcuEeiAD0Vl+9wp9J/6Sgl
+KJ+hVbxszgZrv87gJr0hXfXdRE6ezr8jjxLM1HrJnI7m26hoxP6MlFL3lI/jBISb
+A7c2AlZADQCUz0hKYWpFDt4fmrxyrAWrPY7kCcYBN5o9wr6nBAD8ZJn5/BQH1pMg
+zPwXIP9oUXXWYsTgY1zioDsHU2Aw0uz5wBUQpbfsEUOrHqxYS3ulN9t/RzHfUuJ+
+FyJySw6xAZEz6Sn1b/X2WvAnzqcIEEjV7cPZg592ZNbd13lwKYQmsrzPjOnaaKCM
+8f9bWI2vYQURODPTShW3MQ6HHBpWBwP8Dsw+SzfVRfFeYX1YJajh4XXCaflPt6Q7
+R9vipLyDky0FIMtwR8rFecTQsPVoW8NYUW/rhSqSeaAGWVct/e7vjcaC4x4VQuAD
+o6sWgt7jyqzm5n4jrPIo0o5DtZKJVQkIpRT07H0RqEiZLrJb1dOKGTLG0OhCgks/
+B2PnxY0w1A5CKLQXSmVycnkgPGplcnJ5QGdtYWlsLmNvbT6JAVQEEwEIAD4WIQRD
+u3RopsBcGkTFEhUvt0CQre4IIAUCXeUNFwIbDwUJA8JnAAULCQgHAgYVCgkICwIE
+FgIDAQIeAQIXgAAKCRAvt0CQre4IIKiSCACvNl4LIjR5BP4gFV5wCnqUN/TmPTPi
+ZgLa9LZv5eafiXMY2wPbr4iXNKshRu7QIZlx/U0dCgE4So1ka2mo5UCYYz2y7sTl
+P03AqO8LQ7DLIBePCsR7SCAUz/GCh1/TY4wS6vum06D4zN3IPoB6u6CCVCBIdP2y
+y6mH3MKkQCNangwQ526uc8EhkheXFfg1SrER68elwk0Sy/BDvH9pbkgfxoyZ9wWN
+EWKu4L71sl/j4DzOHBtEJP5aB/pzHZpth5sa8vHEPRB8I5d6sZns9T/N7lbmg3Yo
+4kUUbhi9lsiiLVc/fy4dJqy4Qlsydaz/+jIMUmWIu3DFFjqsMsS5X1eB
+=XuV6
 -----END PGP PRIVATE KEY BLOCK-----</code></pre>
 </div>
 <div id="delete-a-key" class="section level3">
@@ -1700,7 +1706,7 @@ r2UhBefopAW7I9rhhw/Tim/GBLJI3UuTuhmoaVQq4Wj+qNbbRpjuQkrmLA==
 <pre><code>[1] &quot;2C6464AF2A8E4C02&quot;</code></pre>
 <pre class="r"><code>gpg_list_keys()</code></pre>
 <pre><code>                id           name              email
-1 BC79DBE3ED0C2B22          Jerry    jerry@gmail.com
+1 2FB74090ADEE0820          Jerry    jerry@gmail.com
 2 51716619E084DAB9 Michael Rutter marutter@gmail.com</code></pre>
 </div>
 </div>
@@ -1718,14 +1724,14 @@ writeLines(sig, &quot;sig.gpg&quot;)
 cat(sig)</code></pre>
 <pre><code>-----BEGIN PGP SIGNATURE-----
 
-iQEzBAABCAAdFiEEYOex5rCVR1ofirBYvHnb4+0MKyIFAl1+c9cACgkQvHnb4+0M
-KyJN6wf/VJiE3gqUW6n9Q5H1e3Zvk0dPyTufpuwtkKsQAHfu0xONCsBS26dHayp9
-tLoVx7FeGS/qn3Tf0IP6hNr5ceP19WZW6WXOMX1Ndctz6DVIe6YbOaXAWGJ5GUZ2
-bUZqHNum3OWsaFWwEglI8tGnqMmxcisxKra2xEEEqdUZjn1klOkY7MC0ea5bl/5J
-IrhYXGGQBEeC+XfWt4969HHPm3+s+iv8vcJ/6I7WZdQKoPY6ImrJ0vJsMJVh+yjg
-2c8riC0iNvmTEGeyuDMjMYh2JcTrxmzNdGtluf05iJCn3QR+He0mv+V3bNTgbhE4
-3jrHOHRkWvr/lryd8XMTTAKG2l0jwA==
-=dO+c
+iQEzBAABCAAdFiEEQ7t0aKbAXBpExRIVL7dAkK3uCCAFAl3lDRgACgkQL7dAkK3u
+CCAuuwf+OI56ZquTDtCG7xP6HDDNe528IllW9zA6uz9qOav5otzZHJ5ImDOBOQo9
+MtWMYelQSkyGL313GdSLVA8zkSmFFOYgzib8tc68fZVswR3FGVXhiDEjUSgJ8gEi
+qyf4h/C9Z0Zc75mnd6SWuJR07KgH+EEMTJzS+wjJGlACDCrgH828Wqk3OyRGXr0n
+4YS70DT+uIZxIMr8FSS42ruOGQbRIVe5Rh2+U4+Y+Ip6wsdQOjAyeyTFaFfspqaT
+t9XPdbf2jL3T3l5Tg/ePRQl25/SBFk7Ob4tFp20NWKlgwua69BUrMA4nFOkX/GgA
+Wnyo7L/Bltv9hqqBVwtX43Yp8bwmyQ==
+=zMad
 -----END PGP SIGNATURE-----</code></pre>
 <p>You can also create a signed message which includes the data itself by setting <code>mode</code> to <code>normal</code> or <code>clear</code>, which is useful for email:</p>
 <pre class="r"><code>clearsig &lt;- gpg_sign(myfile, mode = &quot;clear&quot;)
@@ -1737,14 +1743,14 @@ Hash: SHA256
 This is a signed message
 -----BEGIN PGP SIGNATURE-----
 
-iQEzBAEBCAAdFiEEYOex5rCVR1ofirBYvHnb4+0MKyIFAl1+c9cACgkQvHnb4+0M
-KyKEmgf/c3YppTDX6OHlQvN7K1wcjPQWQoDSnSdzomnE/QcxJOeZdvywB5WANJws
-okN1ketHDIWK2E5+7g2l4UmYYVki8qahlcxUyVNpkgQbIpfG1LLS9GHdSVqh1A/x
-MrftbEDkrK1zVgkfVk0q4ZP/RM2YxtoEm9QZDRR6vxCeA11BnizGEDWmlaj/N830
-kVEKyajiuPBDYbZP1efa2FvWHpvyoR9mbGOvd0LtZh8/8QWo0UCC2d2vJ1K3hjol
-UlNcMdimSLCXyFSRgiWoqaUyfQTB0sWxVxuZ7OPzw3UZm0jqTBFEUrKMW7dTQ5xF
-FsIMB7Vm/d480JeHbR6s5WR8FBaIEQ==
-=2U3o
+iQEzBAEBCAAdFiEEQ7t0aKbAXBpExRIVL7dAkK3uCCAFAl3lDRgACgkQL7dAkK3u
+CCA0CAgA1JVYkkRun9xxIUX4WSr373r+UYIqCPHVymz8t3FDlR4LrQxkS8KNH+i+
+d//5V8s+TSqKhJDZhka3PUFZl2d/pyftCzP+6Ir0gTaQ8oLsjYfyNUt95C2gH0Un
+kWUjluKRThiM/yyvYU4M8Y2jb/8rnymiYAh1JCUGmgxJ0jdCvspYF6/Go5OFkLTA
+1m0/Y+1AARJ7cIW3V8bERxJ4aiXuC/ZvhzE2Sq/Pd8rK00tFGjDRl8Lz2gs9DzBw
+rT9AKvhDM5sdTf/8zOgGaMchzLKG9xuEBeUXlhQz/fDspOm0CzjM0F+vycqRFsss
+v8thLRmduEK1mMU3bZt2XmkT1gPbRQ==
+=UH5v
 -----END PGP SIGNATURE-----</code></pre>
 </div>
 <div id="verify-a-signature" class="section level3">
@@ -1752,11 +1758,11 @@ FsIMB7Vm/d480JeHbR6s5WR8FBaIEQ==
 <p>The <code>gpg_verify</code> function will see if a signature is valid for any of the keys in the keyring:</p>
 <pre class="r"><code>gpg_verify(&quot;sig.gpg&quot;, data = myfile)</code></pre>
 <pre><code>                               fingerprint           timestamp   hash pubkey success
-1 60E7B1E6B095475A1F8AB058BC79DBE3ED0C2B22 2019-09-15 10:24:39 SHA256    RSA    TRUE</code></pre>
+1 43BB7468A6C05C1A44C512152FB74090ADEE0820 2019-12-02 14:09:44 SHA256    RSA    TRUE</code></pre>
 <p>If the signature is in <code>clear</code> or <code>normal</code> mode, the signature file contains both the message and signature:</p>
 <pre class="r"><code>gpg_verify(&quot;clearsig.gpg&quot;)</code></pre>
 <pre><code>                               fingerprint           timestamp   hash pubkey success
-1 60E7B1E6B095475A1F8AB058BC79DBE3ED0C2B22 2019-09-15 10:24:39 SHA256    RSA    TRUE</code></pre>
+1 43BB7468A6C05C1A44C512152FB74090ADEE0820 2019-12-02 14:09:44 SHA256    RSA    TRUE</code></pre>
 </div>
 <div id="debian-example" class="section level3">
 <h3>Debian example</h3>
@@ -1771,9 +1777,9 @@ gpg_recv(johannes)</code></pre>
 <p>If you don’t trust the CRAN homepage, you could check who has signed this key. You’d need to import the corresponding peer keys for more information.</p>
 <pre class="r"><code>gpg_list_signatures(johannes)</code></pre>
 <pre><code>                id           timestamp           name                  email success
-1 AD5F960A256A04AF 2016-11-15 16:18:06 Johannes Ranke johannes.ranke@jrwb.de    TRUE
-2 2F0F4E14F649AF90 2016-11-15 16:29:16                                         FALSE
-3 06F90DE5381BA480 2016-11-15 16:35:39                                         FALSE</code></pre>
+1 AD5F960A256A04AF 2016-11-16 01:18:06 Johannes Ranke johannes.ranke@jrwb.de    TRUE
+2 2F0F4E14F649AF90 2016-11-16 01:29:16                                         FALSE
+3 06F90DE5381BA480 2016-11-16 01:35:39                                         FALSE</code></pre>
 <p>Now lets verify the release files:</p>
 <pre class="r"><code># Verify the file
 library(curl)
@@ -1781,7 +1787,7 @@ curl_download(&#39;https://cran.r-project.org/bin/linux/debian/buster-cran35/Rel
 curl_download(&#39;https://cran.r-project.org/bin/linux/debian/buster-cran35/Release.gpg&#39;,&#39;Release.gpg&#39;)
 gpg_verify(&#39;Release.gpg&#39;, &#39;Release&#39;)</code></pre>
 <pre><code>                               fingerprint           timestamp   hash pubkey success
-1 AD7B5162BA456BE3526F8D92FCAE2A0E115C3D8A 2019-07-09 00:20:34 SHA512    RSA    TRUE</code></pre>
+1 AD7B5162BA456BE3526F8D92FCAE2A0E115C3D8A 2019-07-09 09:20:34 SHA512    RSA    TRUE</code></pre>
 <p>Looking good! We can trust the checksums in the <code>Release</code> file to be legitimate.</p>
 </div>
 </div>
@@ -1802,15 +1808,15 @@ unlink(&quot;secret.txt&quot;)
 cat(msg)</code></pre>
 <pre><code>-----BEGIN PGP MESSAGE-----
 
-hQEMA4BQ/mdnc2saAQgAsipkgWS9al/LxEQatY4g6VE5URE3Kz05z/LPH5OzjsyI
-R2EAJ89AOsXEr7ayLHWrP0kJ2kIzXUN32b/mpHr//uubYskqF/ecWLihBcT95gXc
-R3xcV/pI6o5ca74PfU+nvzXq9u5ArPNhgR1mfhT1WKy3hSi4WY9vdjSFfrA08J+B
-kQMuKahJJ3cKdi17yC2aXg1Ms5A7h+L76Eb9e4PaWKadDZy0nzfDJ0729iWBfdtH
-1VEKHihlI5v8KsHnef1kUj6Dr3DMSIvuMliqPXpn/BevppuPjMihumJoyiuGxMLO
-29MwCMvgyHtI3jSYygauT2s5tw+4jUhpNbjUdlKoHtJaAYKFNd9P0vx1jM0BxcS1
-/lSyH1cMAxWutxI/LewVqHJ8sQHhEGPJyoShtxWoja9onHUkmaZtWZQ65YUbZ/Yd
-eaCzZZ/KQromGV6hCJBGvp0utMmaUBfUHzFG
-=OIQi
+hQEMA4BQ/mdnc2saAQf+JxlMxPlqamAGQTabv6etBoZrM26VPl1jOL4kQ//qBLq1
+CpyXdXNvBTd9T+V3/bceH86tktIWMG0RxDi3RgAjcwLfJBtg5V/NE9KJQKTIqvOL
+rhLRW0z5GDNnkQrcNAcAshPYlKdmHQlFtspBkkv2Qmwz63AR8JKMeYKhr568iY9A
+Z5B4DeKjIcfmZ7w46FC+CG80/6aYs2bSZZGJ9O/ktQkUajm/6N6G900RDLRg442Q
+dV6Viftto3Ao1EY7si2G7zrl62hM+1q2M8XBPUZ2XC5DunuC98JB0VuTrkP/o73U
+o/+ql0Bn5NcQl4sSSw+k7Q4Jh8Oc2PqzpLzuA2TU8tJaARkdJHGEk5O0+B7JEso1
+gENpRSpTae8ZbpY8CBSVYPVV0SHy/weIrI7vyuAIhveHn4IB0itcwF0BRM9/CPe8
+uKyZoRHb8GX8EkArVdyKo/hSKMBT3PQ7zUCe
+=8foO
 -----END PGP MESSAGE-----</code></pre>
 <p>Now you can safely send this message over any channel (email, twitter, etc). Nobody in the world besides Jeroen will be able to decipher this message (not even you).</p>
 </div>
@@ -1827,15 +1833,15 @@ writeLines(msg, &quot;msg.gpg&quot;)
 cat(msg)</code></pre>
 <pre><code>-----BEGIN PGP MESSAGE-----
 
-hQEMA7x52+PtDCsiAQf/fLVqqXHcN79RmiAdJRFhDSkJ6XmafbDJLovk23qVi79b
-npKG2zNgn2zwYMKEKNyWLQb4ldAK0Ykps3l26d7/3qHZSquNMVpt8TaMVs6d6oFC
-W0uGgq2/qDW5Ev6IlnQZKgpXuSS2Sx8P+Ay+oi5hRln39ABZhB6S0W0hILskRPWN
-1dV9b1+Uu81Ad2E+AnmwR5YDaevsONFj8W7mfqikOeDHAjUHBEVkI9sJoyPlFM/k
-JOTd0aKdwS2Z5s24k/TJ/TCaFFzDUnvk4Wh+Axp6PvoxfoG9li2Nx8MLWwSXdFGQ
-RCigMY7InPYS3ayYellmr9nLc0KSOo95JtJhRoe1g9JJAfJmob8wBR+f+JnRJYVF
-O4GAXHwpHNN8acFPryN+aELXYpVzwkK9uLjUs+A4cLstajtnuOYmHTG5aoq6N2RJ
-Gnd/pXLHHF5Xuw==
-=JkqC
+hQEMAy+3QJCt7gggAQf/V5qO4L3Nwy1MIrwiC3+nL/omjja2VfkQ1c+vPjinB7Ck
+/ogNO3AxfMHQyxxlox2hO0Xagsn3luN1y57VzJEHCTABJOJlpGzXajrllB9pRLXJ
+x9pFBHpUnpoveqbPCbsANQxkFBD99tPGyuKFIAwgYkg63MlY8ThSbyTRLrXgeMMV
+SkiJL25VoImq1/OF7MEtZUBHb+oupj0YeMQhZaHD+e5YI6Y8GiXegeHXVfZ1D75y
+z6Z5la6kXYNdixKhA6x5QT3nyBWQ4p2RdwZC/9t7u5cCHjte5Jt6Vral70qBS0cs
+IJ1FjGyPzADlgPdXd7SvoxOqIOZuxSL5h3XOqyp/VtJJAWeFX+k9SNO+W8KMCt0q
+B9tn+Wmtpns8F5iho7GjacFRT/QmwBFyALg8JRTMDNS/Q6tF22Ps31c1t7U9c058
+7KFD31gKS+Sxog==
+=TkNC
 -----END PGP MESSAGE-----</code></pre>
 <p>Decryption is simple, given that we own the secret key for the message:</p>
 <pre class="r"><code>gpg_decrypt(&quot;msg.gpg&quot;)</code></pre>
@@ -1853,22 +1859,22 @@ writeLines(msg, &quot;msg.gpg&quot;)
 cat(msg)</code></pre>
 <pre><code>-----BEGIN PGP MESSAGE-----
 
-hQEMA4BQ/mdnc2saAQf+IPoRkzGW7oZP/QOnEFqAKrcONB9E79urhuZpKy0T9NLt
-QIfLgjnbm0iSYu5sXMFast8sWEH9snTKMj9qZ3CIj1mpyx9TrGd4ZwK0xMCUeMfu
-DMz2CcaqqnUhXQD2jeTiIxddK0lpBAxkHcii5trl2o7b4uAr6/57YnBwuZvVGIJQ
-CaiPAI8COT7pqjXIULhfFI+MwR6nMO9d4+8RoI0F6E3hcvPXUodYS0OBUkg7prPw
-I8X+AfVQk/o12ZUuclWsZZ4+BmgiRZ5aY5+FqzyFGd5x6ZiTQ2J6/b6XC3Mo9oy4
-q+dlgO2Ucll66nq3fjTAZXz/sQbIJFo7CNaBVQagmdLA0QHEYBH/PPwfq2ykzfO0
-4VzE/vIIGdcgGbXNmv9qLkPUXxXoLIdOe2dnQvkhenApCJZJIKPZg53K14r2fK5D
-ehUnzVT9DfyPKIVaP78bDWH7Pz/ec05gsprxqIX0tjV4ooR8JgkSkkGgWKBhlvop
-XeKZoLcNQ99l8tPg/dJjwPBVXAFRX+82rQvoYyPXPuFUX1s8/JWWMT/1VphP3Pvv
-cIL74WkLpjLJsBUoSr8fOe5zhcDmg72RKZPpm90zQBR5LDp3ouxyVSlw7vaK8JY9
-L4dz/xFvgk/HOx9CazWIIQ4hQ7Ul7NWUODklFuy7JBqK7/yxycN+QDRWuUtFct0b
-kMhYrecg7zWNjINXtGQqyfgaWww08cKB/TMhNutMIJTMgt5lDAUCg5Mbd16OjY7g
-jafHDIOaqHDsC4wA6SmXdhjXqb1GyFUftokLhli1nQwX25/0ePmNoCbZ6UjdTfYc
-Zsy4PCXjevLckkCMaYp3B50Jmen3U4LeNJCPo+AAsHFIEQKRGTTQEeA4nwddb4at
-3XpJ
-=szY3
+hQEMA4BQ/mdnc2saAQgApodPOqjc9LoOSs96PXKgWe06vIPUIYyTqc1yNdXs9UE6
+18S9WAqdY1JXmv4PN8/IHGMc+smRtgoxW7O0WhGEwsYG3umBqg1qd2r7fT6QQJB8
+NESwmBSKWY9vXOCWoYvjzMKgAFVv3RT+XNC1F0IrYi3x4OhBbl7JrmidP2Hlwwyp
+42bFBxbF32ijwqUxjHIKOSP6LIHHXepInOpFf1bGnVYrIUMYBuwq/HAPkMRsQCbl
+qDxZDmWeVqlB2c7+VAbGSpDid6UnnpqN3ZIwCCJVlUwWJlK4aZUIoCKSB0NExbGL
+OUuwrlqPfQI0qSuqyCwoSr+/S+1Au5zgUTX+f6EmBdLA0AGR6z7Se9aWV8B7Frp4
+5Nv7HVOucV01oNyxQd/xDXVMDyN2h/YVObDXyiyQ0tVymDPTiYeV+RweR6lluzoI
+GoJqmtu/8g9hAbV8dXBJKLm1NRMYiERIJOCKYChKN1urDEpBf8+6hu27DXiPswf3
+oOTrRi0MYL9Hu0HbsqblBNszO4CA4rcGq0EecztFTIOINdLZRFdAOy9uFedgg5qD
+2+IgVFWHD0xVF/hfILyd7lQ1/FclsgGavFthN2S26pm6dZrvMx9LT/GJJkgu/pNu
+wRdPHUuczj45rzOqmGcGAUDunM7L5vAmD6WGiFwtQCq+DsSjmTxX/Fc88mg5C5ND
+Yp5XuTLDOVOLtcQCaocbufgZvlIXxIPHq+buLAAdJZuxzoPLAoCj1w1C3tVwRBYp
+uc0A6CQSUBEa0r3LEtPesl8hWcSv6YXHL0BUQ8ddImvQ90QaEKh9cBWmEdklC4Gv
+cwBBiTfpM5WvnXHkowzks3Itk9XIzeNawdGW7CirjQFmUTLjy17yKrGn15MKtMW2
+sgA=
+=d3Ft
 -----END PGP MESSAGE-----</code></pre>
 </div>
 <div id="decrypt-and-verify" class="section level3">
@@ -1880,7 +1886,7 @@ writeLines(msg, &quot;msg.gpg&quot;)
 gpg_decrypt(&quot;msg.gpg&quot;)</code></pre>
 <pre><code>[1] &quot;This is a test!\n&quot;
 attr(,&quot;signer&quot;)
-[1] &quot;60E7B1E6B095475A1F8AB058BC79DBE3ED0C2B22&quot;</code></pre>
+[1] &quot;43BB7468A6C05C1A44C512152FB74090ADEE0820&quot;</code></pre>
 <p>The signer fingerprint (if any) will be added as an attribute to the decrypted message.</p>
 </div>
 </div>
