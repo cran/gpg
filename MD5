@@ -1,7 +1,7 @@
-1e6190b93d2322ac1c9c8c1993e7671d *DESCRIPTION
+389134cc3da5aa4c0b6e753b7340a8cc *DESCRIPTION
 3a9a8e02a6b712446ddd52cb2cb80226 *LICENSE
 5b9f2a9951eb28bbc3d75d2678553d3b *NAMESPACE
-be1eac57aaec1b9f74cf1a1068c76400 *NEWS
+a5f658e5877564b654205158faa9e1ff *NEWS
 5d83d2aba55b95c41439e0d31a9f5b1c *R/encrypt.R
 3a5512c3314d32046d8cdb2e4c89306e *R/keygen.R
 f3310ba561c93f97d6d7d11325e2bff4 *R/keys.R
@@ -9,13 +9,13 @@ f3310ba561c93f97d6d7d11325e2bff4 *R/keys.R
 808e7325583f27b8ed1930d91bd5fd7b *R/password.R
 9968f1343554972bcb9dbb06d9d0d995 *R/restart.R
 ed780ec4c410643955ceac5fe81d87ac *R/signing.R
-9ae259513860c44d49e4630e5603458c *build/vignette.rds
-6071edd604dbeb75308cfbedc7790398 *cleanup
-5d71527ccd491c8511f320922de65a16 *configure
+7498c722fed2e55d9bf16b62e21305b2 *build/vignette.rds
+bc7baead3b6080f04dc81efd2fe1ff39 *cleanup
+ce4921da2cea1478c84814cb81a97822 *configure
 d41d8cd98f00b204e9800998ecf8427e *configure.win
 4ba71eadcbd1ff12b06c478ce98c0f44 *inst/doc/intro.R
-3323a2653df160c03db20af4911ac7e0 *inst/doc/intro.Rmd
-0fc20152bcdecf33bcf1d34c45f46d0d *inst/doc/intro.html
+ed71e5d53aee8b0c899d23599d68dff7 *inst/doc/intro.Rmd
+8903cb53f421279759fcb08049c6dc4d *inst/doc/intro.html
 2dd93f9fcf6bfed27df5656124a5365c *man/gpg_encrypt.Rd
 172a555ba5ed926995d81fc444d274b3 *man/gpg_info.Rd
 35186551753c055289143b1f76f74340 *man/gpg_keygen.Rd
@@ -23,7 +23,8 @@ d41d8cd98f00b204e9800998ecf8427e *configure.win
 a19ac0f7a5914d9fc8bb20256618d553 *man/gpg_sign.Rd
 d2397502fd03e450dbf56e0f98d2862e *man/pinentry.Rd
 111e1efb50ff675feb507ea42a24b300 *src/Makevars.in
-973754189149a6ba7a41c8de4b3dab48 *src/Makevars.win
+c0ca5b817d3d7e6889d99b8a18775c7d *src/Makevars.ucrt
+a3ef1686cea38d8b638bcb5079861808 *src/Makevars.win
 6b58e8b4b825c6f04447e1768116a724 *src/common.h
 0cbd720840e98b84fa914d8a930c0b2f *src/encrypt.c
 0fda30a5019a2948555be7d14ca7165c *src/engine.c
@@ -33,4 +34,4 @@ d2397502fd03e450dbf56e0f98d2862e *man/pinentry.Rd
 ab08d57ac617dfd977b4157bea8dd417 *src/register.c
 a66500c0b74fcf103c413cfa88857138 *src/sign.c
 bbe83a41698c7f0b192d111e1ad9000e *tools/winlibs.R
-3323a2653df160c03db20af4911ac7e0 *vignettes/intro.Rmd
+ed71e5d53aee8b0c899d23599d68dff7 *vignettes/intro.Rmd
