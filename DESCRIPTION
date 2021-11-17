@@ -1,7 +1,7 @@
 Package: gpg
 Type: Package
 Title: GNU Privacy Guard for R
-Version: 1.2.3
+Version: 1.2.4
 Authors@R: person("Jeroen", "Ooms", email = "jeroen@berkeley.edu", 
     comment = c(ORCID = "0000-0002-4035-0289"), role = c("aut", "cre"))
 Description: Bindings to GnuPG for working with OpenGPG (RFC4880) cryptographic methods.
@@ -21,8 +21,8 @@ VignetteBuilder: knitr
 URL: https://github.com/jeroen/gpg
 BugReports: https://github.com/jeroen/gpg/issues
 NeedsCompilation: yes
-Packaged: 2021-07-26 19:55:04 UTC; jeroen
+Packaged: 2021-11-17 12:48:21 UTC; jeroen
 Author: Jeroen Ooms [aut, cre] (<https://orcid.org/0000-0002-4035-0289>)
 Maintainer: Jeroen Ooms <jeroen@berkeley.edu>
 Repository: CRAN
-Date/Publication: 2021-07-26 20:10:02 UTC
+Date/Publication: 2021-11-17 13:00:02 UTC

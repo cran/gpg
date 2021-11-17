@@ -1,7 +1,7 @@
-389134cc3da5aa4c0b6e753b7340a8cc *DESCRIPTION
+876dc6fe269b73f08eb652311e6d557e *DESCRIPTION
 3a9a8e02a6b712446ddd52cb2cb80226 *LICENSE
 5b9f2a9951eb28bbc3d75d2678553d3b *NAMESPACE
-a5f658e5877564b654205158faa9e1ff *NEWS
+65d83f0082ce2d79a63bceb5e69154c7 *NEWS
 5d83d2aba55b95c41439e0d31a9f5b1c *R/encrypt.R
 3a5512c3314d32046d8cdb2e4c89306e *R/keygen.R
 f3310ba561c93f97d6d7d11325e2bff4 *R/keys.R
@@ -9,13 +9,13 @@ f3310ba561c93f97d6d7d11325e2bff4 *R/keys.R
 808e7325583f27b8ed1930d91bd5fd7b *R/password.R
 9968f1343554972bcb9dbb06d9d0d995 *R/restart.R
 ed780ec4c410643955ceac5fe81d87ac *R/signing.R
-7498c722fed2e55d9bf16b62e21305b2 *build/vignette.rds
-bc7baead3b6080f04dc81efd2fe1ff39 *cleanup
-ce4921da2cea1478c84814cb81a97822 *configure
+458ae0b2ca0cad481fa5d5c593265a7d *build/vignette.rds
+a8f4963fbeaee57d5b0c203b97680673 *cleanup
+53bc454c2471ba0f876521f5cea8600f *configure
 d41d8cd98f00b204e9800998ecf8427e *configure.win
-4ba71eadcbd1ff12b06c478ce98c0f44 *inst/doc/intro.R
-ed71e5d53aee8b0c899d23599d68dff7 *inst/doc/intro.Rmd
-8903cb53f421279759fcb08049c6dc4d *inst/doc/intro.html
+06ca6aeda3d1c71e3b624ddfb9bd2ef1 *inst/doc/intro.R
+fc0abbfaa9a85b96a50904043ed041da *inst/doc/intro.Rmd
+a1cd4fa4e8d7aa214f2f47d15746d001 *inst/doc/intro.html
 2dd93f9fcf6bfed27df5656124a5365c *man/gpg_encrypt.Rd
 172a555ba5ed926995d81fc444d274b3 *man/gpg_info.Rd
 35186551753c055289143b1f76f74340 *man/gpg_keygen.Rd
@@ -34,4 +34,4 @@ a3ef1686cea38d8b638bcb5079861808 *src/Makevars.win
 ab08d57ac617dfd977b4157bea8dd417 *src/register.c
 a66500c0b74fcf103c413cfa88857138 *src/sign.c
 bbe83a41698c7f0b192d111e1ad9000e *tools/winlibs.R
-ed71e5d53aee8b0c899d23599d68dff7 *vignettes/intro.Rmd
+fc0abbfaa9a85b96a50904043ed041da *vignettes/intro.Rmd
