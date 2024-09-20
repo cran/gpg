@@ -1,8 +1,8 @@
 Package: gpg
 Type: Package
 Title: GNU Privacy Guard for R
-Version: 1.2.9
-Authors@R: person("Jeroen", "Ooms", email = "jeroen@berkeley.edu", 
+Version: 1.3.0
+Authors@R: person("Jeroen", "Ooms", email = "jeroenooms@gmail.com", 
     comment = c(ORCID = "0000-0002-4035-0289"), role = c("aut", "cre"))
 Description: Bindings to GnuPG for working with OpenGPG (RFC4880) cryptographic 
     methods. Includes utilities for public key encryption, creating and verifying
@@ -22,8 +22,8 @@ URL: https://github.com/jeroen/gpg
 BugReports: https://github.com/jeroen/gpg/issues
 Encoding: UTF-8
 NeedsCompilation: yes
-Packaged: 2023-05-16 13:39:27 UTC; jeroen
+Packaged: 2024-09-19 16:01:50 UTC; jeroen
 Author: Jeroen Ooms [aut, cre] (<https://orcid.org/0000-0002-4035-0289>)
-Maintainer: Jeroen Ooms <jeroen@berkeley.edu>
+Maintainer: Jeroen Ooms <jeroenooms@gmail.com>
 Repository: CRAN
-Date/Publication: 2023-05-18 10:30:10 UTC
+Date/Publication: 2024-09-20 09:00:06 UTC
